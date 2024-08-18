@@ -201,7 +201,57 @@
     F(ICE_SHARD) \
     F(AQUA_JET) \
     F(SHADOW_PUNCH) \
-    F(LEAF_STORM)
+    F(LEAF_STORM) \
+    F(BOUNCE) \
+    F(BUBBLE_BEAM) \
+    F(TWISTER) \
+    F(RAPID_SPIN) \
+    F(BULLET_PUNCH) \
+    F(MACH_PUNCH) \
+    F(ACCELEROCK) \
+    F(REVENGE) \
+    F(VACUUM_WAVE) \
+    F(ZAP_CANNON) \
+    F(FAKE_OUT) \
+    F(RECOVER) \
+    F(EXTREME_SPEED) \
+    F(ME_FIRST) \
+    F(DRAGON_TAIL) \
+    F(KNOCK_OFF) \
+    F(SIGNAL_BEAM) \
+    F(BATON_PASS) \
+    F(SCREECH) \
+    F(AURORA_BEAM) \
+    F(STICKY_WEB) \
+    F(PARTING_SHOT) \
+    F(SUPER_FANG) \
+    F(MAGNET_RISE) \
+    F(COVET) \
+    F(WEATHER_BALL) \
+    F(LICK) \
+    F(PAIN_SPLIT) \
+    F(BIND) \
+    F(ENDEAVOR) \
+    F(HYPNOSIS) \
+    F(FOUL_PLAY) \
+    F(LAST_RESORT) \
+    F(FAKE_TEARS) \
+    F(CONFIDE) \
+    F(SCARY_FACE) \
+    F(ENCORE) \
+    F(SPITE) \
+    F(HEAT_CRASH) \
+    F(BOOMBURST) \
+    F(AGILITY) \
+    F(VENOM_DRENCH) \
+    F(FOCUS_ENERGY) \
+    F(SHELL_SMASH) \
+    F(HEAL_BLOCK) \
+    F(FUTURE_SIGHT) \
+    F(WISH) \
+    F(AMNESIA) \
+    F(BELLY_DRUM) \
+    F(YAWN)
 
 #define FOREACH_HM(F) \
     F(CUT) \
