@@ -1,5 +1,7 @@
 #include "global.h"
 #include "malloc.h"
+#include "battle.h"
+#include "battle_ai_main.h"
 #include "battle_anim.h"
 #include "battle_interface.h"
 #include "decompress.h"
@@ -3116,12 +3118,6 @@ const struct SpriteTemplate gChainBindingSpriteTemplate =
 };
 
 // functions
-// args[0] - initial x offset
-// args[1] - initial y offset
-// args[2] - some param to linear translation
-// args[3] - some param to linear translation
-// args[4] - offset that gets added to param for Sin
-// args[5] - another param for Sin
 static void AnimGrassKnot(struct Sprite *sprite)
 {
     if (BATTLE_PARTNER(gBattleAnimAttacker) == gBattleAnimTarget && GetBattlerPosition(gBattleAnimTarget) < B_POSITION_PLAYER_RIGHT)
@@ -5978,12 +5974,12 @@ static void AnimBowMon_Step1_Callback(struct Sprite *sprite)
     {
         sprite->data[3] = gBattlerSpriteIds[gBattleAnimAttacker];
         PrepareBattlerSpriteForRotScale(sprite->data[3], ST_OAM_OBJ_NORMAL);
-        sprite->data[4] = (sprite->data[6] = GetBattlerSide(gBattleAnimAttacker)) ? 768 : -768;
+        sprite->data[4] = (sprite->data[6] = GetBattlerSide(gBattleAnimAttacker)) ? 0x300 : 0xFFFFFD00;
         sprite->data[5] = 0;
     }
 
     sprite->data[5] += sprite->data[4];
-    SetSpriteRotScale(sprite->data[3], 256, 256, sprite->data[5]);
+    SetSpriteRotScale(sprite->data[3], 0x100, 0x100, sprite->data[5]);
     SetBattlerSpriteYOffsetFromRotation(sprite->data[3]);
     if (++sprite->data[0] > 3)
     {
@@ -6469,8 +6465,6 @@ static void UNUSED AnimTask_ShowBattlersHealthbox(u8 taskId)
     DestroyAnimVisualTask(taskId);
 }
 
-// args[0] - sprite x
-// args[1] - sprite y
 static void AnimMoon(struct Sprite *sprite)
 {
     if (IsContest())
@@ -6914,11 +6908,11 @@ static void AnimTask_AllySwitchDataSwap(u8 taskId)
     SWAP(gMoveSelectionCursor[battlerAtk], gMoveSelectionCursor[battlerPartner], temp);
     // Swap turn order, so that all the battlers take action
     SWAP(gChosenActionByBattler[battlerAtk], gChosenActionByBattler[battlerPartner], temp);
-    for (i = 0; i < gBattlersCount; i++)
+    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
     {
         if (gBattlerByTurnOrder[i] == battlerAtk || gBattlerByTurnOrder[i] == battlerPartner)
         {
-            for (j = i + 1; j < gBattlersCount; j++)
+            for (j = i + 1; j < MAX_BATTLERS_COUNT; j++)
             {
                 if (gBattlerByTurnOrder[j] == battlerAtk || gBattlerByTurnOrder[j] == battlerPartner)
                     break;
@@ -6938,14 +6932,10 @@ static void AnimTask_AllySwitchDataSwap(u8 taskId)
     TrySwapWishBattlerIds(battlerAtk, battlerPartner);
 
     // For Snipe Shot and abilities Stalwart/Propeller Tail - keep the original target.
-    for (i = 0; i < gBattlersCount; i++)
+    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
     {
-        u16 ability = GetBattlerAbility(i);
-        // if not targeting a slot that got switched, continue
-        if (!IsBattlerAlly(gBattleStruct->moveTarget[i], battlerAtk))
-            continue;
-
-        if (gChosenMoveByBattler[i] == MOVE_SNIPE_SHOT || ability == ABILITY_PROPELLER_TAIL || ability == ABILITY_STALWART)
+        //u16 ability = GetBattlerAbility(i);
+        if (gChosenMoveByBattler[i] == MOVE_SNIPE_SHOT || BattlerHasTrait(i, ABILITY_PROPELLER_TAIL) || BattlerHasTrait(i, ABILITY_STALWART))
             gBattleStruct->moveTarget[i] ^= BIT_FLANK;
     }
 

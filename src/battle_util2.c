@@ -1,5 +1,6 @@
 #include "global.h"
 #include "battle.h"
+#include "battle_ai_main.h"
 #include "battle_anim.h"
 #include "battle_controllers.h"
 #include "malloc.h"
@@ -54,6 +55,7 @@ void FreeBattleResources(void)
     gFieldStatuses = 0;
     if (gBattleResources != NULL)
     {
+        memset(&gBattleStruct->illusion, 0, sizeof(gBattleStruct->illusion));
         FREE_AND_SET_NULL(gBattleStruct);
 
         FREE_AND_SET_NULL(gBattleResources->secretBase);
@@ -148,7 +150,7 @@ u32 BattlePalace_TryEscapeStatus(u8 battler)
                 {
                     u32 toSub;
 
-                    if (GetBattlerAbility(battler) == ABILITY_EARLY_BIRD)
+                    if (BattlerHasTrait(battler, ABILITY_EARLY_BIRD))
                         toSub = 2;
                     else
                         toSub = 1;

@@ -1198,9 +1198,6 @@ void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, 
     SetBoxMonData(boxMon, MON_DATA_POKEBALL, &value);
     SetBoxMonData(boxMon, MON_DATA_OT_GENDER, &gSaveBlock2Ptr->playerGender);
 
-    u32 teraType = (boxMon->personality & 0x1) == 0 ? gSpeciesInfo[species].types[0] : gSpeciesInfo[species].types[1];
-    SetBoxMonData(boxMon, MON_DATA_TERA_TYPE, &teraType);
-
     if (fixedIV < USE_RANDOM_IVS)
     {
         SetBoxMonData(boxMon, MON_DATA_HP_IV, &fixedIV);
@@ -2005,22 +2002,16 @@ u16 MonTryLearningNewMove(struct Pokemon *mon, bool8 firstMove)
         }
     }
 
-    //  Handler for Pokémon whose moves change upon form change.
-    //  For example, if Zacian or Zamazenta should learn Iron Head,
-    //  they're prevented from doing if they have Behemoth Blade/Bash,
-    //  since it transforms into them while in their Crowned forms.
-    const struct FormChange *formChanges = GetSpeciesFormChanges(species);
-
-    for (u32 i = 0; formChanges != NULL && formChanges[i].method != FORM_CHANGE_TERMINATOR; i++)
+    //  Handler for if Zacian or Zamazenta should learn Iron Head
+    //  since it transforms in the Behemoth Blade/Bash move in
+    //  battle in the Crowned forms.
+    if (learnset[sLearningMoveTableID].move == MOVE_IRON_HEAD && (species == SPECIES_ZAMAZENTA_CROWNED || species == SPECIES_ZACIAN_CROWNED))
     {
-        if (formChanges[i].method == FORM_CHANGE_END_BATTLE
-            && learnset[sLearningMoveTableID].move == formChanges[i].param3)
+        for (u32 accessor = MON_DATA_MOVE1; accessor <= MON_DATA_MOVE4; accessor++)
         {
-            for (u32 j = 0; j < MAX_MON_MOVES; j++)
-            {
-                if (formChanges[i].param2 == GetMonData(mon, MON_DATA_MOVE1 + j))
-                    return MOVE_NONE;
-            }
+            u32 move = GetMonData(mon, accessor);
+            if (move == MOVE_BEHEMOTH_BLADE || move == MOVE_BEHEMOTH_BASH)
+                return MOVE_NONE;
         }
     }
 
@@ -3649,10 +3640,10 @@ const u16 *GetSpeciesFormTable(u16 species)
 
 const struct FormChange *GetSpeciesFormChanges(u16 species)
 {
-    const struct FormChange *formChanges = gSpeciesInfo[SanitizeSpeciesId(species)].formChangeTable;
-    if (formChanges == NULL)
+    const struct FormChange *evolutions = gSpeciesInfo[SanitizeSpeciesId(species)].formChangeTable;
+    if (evolutions == NULL)
         return gSpeciesInfo[SPECIES_NONE].formChangeTable;
-    return formChanges;
+    return evolutions;
 }
 
 u8 CalculatePPWithBonus(u16 move, u8 ppBonuses, u8 moveIndex)
@@ -6014,14 +6005,14 @@ static s32 GetWildMonTableIdInAlteringCave(u16 species)
 
 static inline bool32 CanFirstMonBoostHeldItemRarity(void)
 {
-    u32 ability;
+    //u32 ability;
     if (GetMonData(&gPlayerParty[0], MON_DATA_SANITY_IS_EGG))
         return FALSE;
 
-    ability = GetMonAbility(&gPlayerParty[0]);
-    if (ability == ABILITY_COMPOUND_EYES)
+    //ability = GetMonAbility(&gPlayerParty[0]);
+    if (MonHasTrait(&gPlayerParty[0], ABILITY_COMPOUND_EYES, TRUE))
         return TRUE;
-    else if ((OW_SUPER_LUCK >= GEN_8) && ability == ABILITY_SUPER_LUCK)
+    else if ((OW_SUPER_LUCK >= GEN_8) && MonHasTrait(&gPlayerParty[0], ABILITY_SUPER_LUCK, TRUE))
         return TRUE;
     return FALSE;
 }
@@ -7073,8 +7064,52 @@ bool32 IsSpeciesForeignRegionalForm(u32 species, u32 currentRegion)
     return FALSE;
 }
 
-u32 GetTeraTypeFromPersonality(struct Pokemon *mon)
+
+//Returns the slot the Innate is found in, assuming the Ability is already slot 1.  Returns 0 if not found.
+u8 SpeciesHasInnate(u16 species, u16 ability, u32 personality, bool8 disablerandomizer) {
+    u8 i;
+    u8 innateNum = 0;
+
+    for (i = 0; i < MAX_MON_INNATES; i++)
+    {
+        if (gSpeciesInfo[species].innates[i] == ability)
+            {
+                innateNum = i + 2;
+                //DebugPrintf("INNATE FOUND: %d", innateNum - 1);
+            }
+    }
+    
+    //if (!disablerandomizer) {
+    //    innate1 = RandomizeInnate(gBaseStats[species].innates[0], species, personality);
+    //    innate2 = RandomizeInnate(gBaseStats[species].innates[1], species, personality);
+    //    innate3 = RandomizeInnate(gBaseStats[species].innates[2], species, personality);
+    //}
+        return innateNum;
+}
+
+bool8 BoxMonHasInnate(struct BoxPokemon *boxmon, u16 ability, bool8 disableRandomizer) {
+    u16 species = GetBoxMonData(boxmon, MON_DATA_SPECIES, NULL);
+    u32 personality = GetBoxMonData(boxmon, MON_DATA_PERSONALITY, NULL);
+
+    return SpeciesHasInnate(species, ability, personality, disableRandomizer);
+}
+
+bool8 MonHasTrait(struct Pokemon *mon, u16 ability, bool8 disableRandomizer)
 {
-    const u8 *types = gSpeciesInfo[GetMonData(mon, MON_DATA_SPECIES)].types;
-    return (GetMonData(mon, MON_DATA_PERSONALITY) & 0x1) == 0 ? types[0] : types[1];
+    u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
+    u8 personality = GetMonData(mon, MON_DATA_PERSONALITY, NULL);
+    return (GetMonAbility(mon) == ability || SpeciesHasInnate(species, ability, personality, disableRandomizer));
+} 
+
+u16 GetSpeciesInnate(u16 species, u8 traitNum, u32 personality, bool8 disablerandomizer) {
+    //u8 i;
+
+    //if (!disablerandomizer) {
+    //    return RandomizeInnate(gBaseStats[species].innates[traitNum], species, personality);
+    //}
+
+    if (MAX_MON_INNATES > 0)
+            return gSpeciesInfo[species].innates[traitNum - 1];
+    else
+        return 0;
 }

@@ -2,6 +2,7 @@
 #include "malloc.h"
 #include "battle.h"
 #include "pokemon.h"
+#include "battle_ai_main.h"
 #include "battle_controllers.h"
 #include "battle_interface.h"
 #include "battle_z_move.h"
@@ -922,7 +923,7 @@ static void UpdateLvlInHealthbox(u8 healthboxSpriteId, u8 lvl)
     u8 battler = gSprites[healthboxSpriteId].hMain_Battler;
 
     // Don't print Lv char if mon has a gimmick with an indicator active.
-    if (GetIndicatorPalTag(battler) != TAG_NONE)
+    if (GetIndicatorTileTag(battler) != TAG_NONE)
     {
         objVram = ConvertIntToDecimalStringN(text, lvl, STR_CONV_MODE_LEFT_ALIGN, 3);
         xPos = 5 * (3 - (objVram - (text + 2))) - 1;
@@ -2794,6 +2795,7 @@ void UpdateAbilityPopup(u8 battlerId)
     u8 spriteId2 = gBattleStruct->abilityPopUpSpriteIds[battlerId][1];
     u16 ability = (gBattleScripting.abilityPopupOverwrite != 0) ? gBattleScripting.abilityPopupOverwrite : gBattleMons[battlerId].ability;
 
+    PopTraitStack();
     PrintAbilityOnAbilityPopUp(ability, spriteId1, spriteId2);
     RestoreOverwrittenPixels((void*)(OBJ_VRAM0) + (gSprites[spriteId1].oam.tileNum * 32));
 }

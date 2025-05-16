@@ -1331,7 +1331,7 @@
 	.byte \stat
 	.endm
 
-	.macro jumpifcaptivateaffected jumpInstr:req
+	.macro jumpifoppositegenders jumpInstr:req
 	.byte 0xfc
 	.4byte \jumpInstr
 	.endm
@@ -1367,10 +1367,6 @@
 	callnative BS_RestoreAttacker
 	.endm
 
-	.macro jumpifintimidateabilityprevented
-	callnative BS_JumpIfIntimidateAbilityPrevented
-	.endm
-
 	.macro metalburstdamagecalculator failInstr:req
 	callnative BS_CalcMetalBurstDmg
 	.4byte \failInstr
@@ -1385,10 +1381,6 @@
 	.macro itemstatchangeeffects battler:req
 	callnative BS_RunStatChangeItems
 	.byte \battler
-	.endm
-
-	.macro tryintimidatejectpack
-	callnative BS_TryIntimidatEjectpack
 	.endm
 
 	.macro allyswitchswapbattlers
@@ -1753,6 +1745,10 @@
 	.macro storehealingwish battler:req
 	callnative BS_StoreHealingWish
 	.byte \battler
+	.endm
+
+	.macro hitswitchtargetfailed
+	callnative BS_HitSwitchTargetFailed
 	.endm
 
 	.macro tryrevivalblessing, failInstr:req
@@ -2593,4 +2589,10 @@
 	.macro flushtextbox
 	printstring STRINGID_EMPTYSTRING3
 	waitmessage 1
+	.endm
+
+	.macro pushtraitstack battler:req, ability:req
+	callnative BS_PushTraitStack
+	.byte \battler
+	.2byte \ability
 	.endm

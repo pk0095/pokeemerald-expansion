@@ -183,13 +183,14 @@ struct ProtectStruct
     u16 eatMirrorHerb:1;
     u16 activateOpportunist:2; // 2 - to copy stats. 1 - stats copied (do not repeat). 0 - no stats to copy
     u16 usedAllySwitch:1;
-    u16 lashOutAffected:1;
-    u16 padding:1;
+    u16 padding:2;
     // End of 16-bit bitfield
     u32 physicalDmg;
     u32 specialDmg;
     u8 physicalBattlerId;
     u8 specialBattlerId;
+    u8 contraryDefiant; // 1 - Contrary + Defiant triggered (do not repeat). 0 - abilities not triggered together yet
+    u8 contraryCompetitive; // 1 - Contrary + Competitive triggered (do not repeat). 0 - abilities not triggered together yet
 };
 
 // Cleared at the start of HandleAction_ActionFinished
@@ -212,6 +213,7 @@ struct SpecialStatus
     u8 sturdied:1;
     u8 stormDrainRedirected:1;
     u8 switchInAbilityDone:1;
+    bool8 switchInTraitDone[MAX_MON_TRAITS];
     u8 switchInItemDone:1;
     u8 instructedChosenTarget:3;
     u8 berryReduced:1;
@@ -228,11 +230,13 @@ struct SpecialStatus
     // End of byte
     u8 dancerUsedMove:1;
     u8 dancerOriginalTarget:3;
+    u8 preventLifeOrbDamage:1; // So that Life Orb doesn't activate various effects.
     u8 distortedTypeMatchups:1;
     u8 teraShellAbilityDone:1;
     u8 criticalHit:1;
-    u8 enduredDamage:1;
     // End of byte
+    u8 enduredDamage:1;
+    u8 padding:7;
 };
 
 struct SideTimer
@@ -341,6 +345,7 @@ struct SimulatedDamage
 struct AiLogicData
 {
     u16 abilities[MAX_BATTLERS_COUNT];
+    u16 innates[MAX_BATTLERS_COUNT][MAX_MON_INNATES];
     u16 items[MAX_BATTLERS_COUNT];
     u16 holdEffects[MAX_BATTLERS_COUNT];
     u8 holdEffectParams[MAX_BATTLERS_COUNT];
@@ -669,6 +674,7 @@ struct BattleStruct
     u8 moneyMultiplierMove:1;
     u8 savedTurnActionNumber;
     u8 eventsBeforeFirstTurnState;
+    u8 switchInAbilitiesCounter;
     u8 faintedActionsState;
     u8 faintedActionsBattlerId;
     u8 scriptPartyIdx; // for printing the nickname
@@ -787,17 +793,17 @@ struct BattleStruct
     // When using a move which hits multiple opponents which is then bounced by a target, we need to make sure, the move hits both opponents, the one with bounce, and the one without.
     u8 attackerBeforeBounce:2;
     u8 beatUpSlot:3;
-    u8 pledgeMove:1;
+    u8 hitSwitchTargetFailed:1;
     u8 effectsBeforeUsingMoveDone:1; // Mega Evo and Focus Punch/Shell Trap effects.
     u8 spriteIgnore0Hp:1;
     u8 battleBondTransformed[NUM_BATTLE_SIDES]; // Bitfield for each party.
     u8 bonusCritStages[MAX_BATTLERS_COUNT]; // G-Max Chi Strike boosts crit stages of allies.
     u8 itemPartyIndex[MAX_BATTLERS_COUNT];
     u8 itemMoveIndex[MAX_BATTLERS_COUNT];
+    u8 pledgeMove:1;
     u8 isSkyBattle:1;
-    s32 aiDelayTimer; // Counts number of frames AI takes to choose an action.
-    s32 aiDelayFrames; // Number of frames it took to choose an action.
-    s32 aiDelayCycles; // Number of cycles it took to choose an action.
+    u32 aiDelayTimer; // Counts number of frames AI takes to choose an action.
+    u32 aiDelayFrames; // Number of frames it took to choose an action.
     u8 timesGotHit[NUM_BATTLE_SIDES][PARTY_SIZE];
     u8 transformZeroToHero[NUM_BATTLE_SIDES];
     u8 stickySyrupdBy[MAX_BATTLERS_COUNT];
@@ -833,6 +839,8 @@ struct BattleStruct
     u8 usedMicleBerry;
     struct MessageStatus slideMessageStatus;
     u8 trainerSlideSpriteIds[MAX_BATTLERS_COUNT];
+    u8 embodyAspectBoost[NUM_BATTLE_SIDES];
+    u16 savedMove; // backup current move for mid-turn switching, e.g. Red Card
     u16 opponentMonCanTera:6;
     u16 opponentMonCanDynamax:6;
     u16 padding:4;
@@ -1112,6 +1120,10 @@ extern u16 gCalledMove;
 extern s32 gBideDmg[MAX_BATTLERS_COUNT];
 extern u16 gLastUsedItem;
 extern u16 gLastUsedAbility;
+extern u16 gDisplayAbility;
+extern u16 gDisplayAbility2;
+extern u8 gDisplayBattler;
+extern u16 gTraitStack[MAX_BATTLERS_COUNT * MAX_MON_TRAITS][2];
 extern u8 gBattlerAttacker;
 extern u8 gBattlerTarget;
 extern u8 gBattlerFainted;

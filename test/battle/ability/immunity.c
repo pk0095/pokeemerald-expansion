@@ -1,7 +1,7 @@
 #include "global.h"
 #include "test/battle.h"
 
-SINGLE_BATTLE_TEST("Immunity prevents Poison Sting poison")
+SINGLE_BATTLE_TEST("ABILITY: Immunity prevents Poison Sting poison")
 {
     GIVEN {
         ASSUME(MoveHasAdditionalEffect(MOVE_POISON_STING, MOVE_EFFECT_POISON) == TRUE);
@@ -15,7 +15,7 @@ SINGLE_BATTLE_TEST("Immunity prevents Poison Sting poison")
     }
 }
 
-SINGLE_BATTLE_TEST("Immunity prevents Toxic bad poison")
+SINGLE_BATTLE_TEST("ABILITY: Immunity prevents Toxic bad poison")
 {
     GIVEN {
         ASSUME(GetMoveEffect(MOVE_TOXIC) == EFFECT_TOXIC);
@@ -31,7 +31,7 @@ SINGLE_BATTLE_TEST("Immunity prevents Toxic bad poison")
     }
 }
 
-SINGLE_BATTLE_TEST("Immunity prevents Toxic Spikes poison")
+SINGLE_BATTLE_TEST("ABILITY: Immunity prevents Toxic Spikes poison")
 {
     GIVEN {
         ASSUME(GetMoveEffect(MOVE_TOXIC_SPIKES) == EFFECT_TOXIC_SPIKES);
@@ -46,19 +46,47 @@ SINGLE_BATTLE_TEST("Immunity prevents Toxic Spikes poison")
     }
 }
 
-SINGLE_BATTLE_TEST("Immunity doesn't prevent pokemon from being poisoned by Toxic Spikes on switch-in if forced in by phazing with Mold Breaker, but it cures it immediately")
+SINGLE_BATTLE_TEST("INNATE: Immunity prevents Poison Sting poison")
 {
     GIVEN {
-        ASSUME(GetMoveEffect(MOVE_DRAGON_TAIL) == EFFECT_HIT_SWITCH_TARGET);
+        ASSUME(MoveHasAdditionalEffect(MOVE_POISON_STING, MOVE_EFFECT_POISON) == TRUE);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_SNORLAX) { Ability(ABILITY_THICK_FAT); Innates(ABILITY_IMMUNITY); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_POISON_STING); }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_POISON_STING, player);
+        NOT STATUS_ICON(opponent, poison: TRUE);
+    }
+}
+
+SINGLE_BATTLE_TEST("INNATE: Immunity prevents Toxic bad poison")
+{
+    GIVEN {
+        ASSUME(GetMoveEffect(MOVE_TOXIC) == EFFECT_TOXIC);
+        PLAYER(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_SNORLAX) { Ability(ABILITY_THICK_FAT); Innates(ABILITY_IMMUNITY); }
+    } WHEN {
+        TURN { MOVE(player, MOVE_TOXIC); }
+    } SCENE {
+        MESSAGE("Wobbuffet used Toxic!");
+        ABILITY_POPUP(opponent, ABILITY_IMMUNITY);
+        MESSAGE("The opposing Snorlax's Immunity prevents poisoning!");
+        NOT STATUS_ICON(opponent, poison: TRUE);
+    }
+}
+
+SINGLE_BATTLE_TEST("INNATE: Immunity prevents Toxic Spikes poison")
+{
+    GIVEN {
         ASSUME(GetMoveEffect(MOVE_TOXIC_SPIKES) == EFFECT_TOXIC_SPIKES);
         PLAYER(SPECIES_WOBBUFFET);
-        PLAYER(SPECIES_SNORLAX) { Ability(ABILITY_IMMUNITY); }
-        OPPONENT(SPECIES_PINSIR) { Ability(ABILITY_MOLD_BREAKER); }
+        OPPONENT(SPECIES_WOBBUFFET);
+        OPPONENT(SPECIES_SNORLAX) { Ability(ABILITY_THICK_FAT); Innates(ABILITY_IMMUNITY); }
     } WHEN {
-        TURN { MOVE(opponent, MOVE_TOXIC_SPIKES); }
-        TURN { MOVE(opponent, MOVE_DRAGON_TAIL); }
+        TURN { MOVE(player, MOVE_TOXIC_SPIKES); }
+        TURN { SWITCH(opponent, 1); }
     } SCENE {
-        STATUS_ICON(player, STATUS1_POISON);
-        NOT HP_BAR(player);
+        NOT STATUS_ICON(opponent, poison: TRUE);
     }
 }

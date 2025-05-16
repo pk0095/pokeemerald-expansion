@@ -249,8 +249,8 @@ DOUBLE_BATTLE_TEST("Instructed move will be redirected by Follow Me after instru
     PARAMETRIZE { moveTarget = opponentLeft; }
     PARAMETRIZE { moveTarget = opponentRight; }
     GIVEN {
-        ASSUME(GetMoveEffect(MOVE_FOLLOW_ME) == EFFECT_FOLLOW_ME);
-        ASSUME(GetMoveEffect(MOVE_SKILL_SWAP) == EFFECT_SKILL_SWAP);
+        ASSUME(gMovesInfo[MOVE_FOLLOW_ME].effect == EFFECT_FOLLOW_ME);
+        ASSUME(gMovesInfo[MOVE_SKILL_SWAP].effect == EFFECT_SKILL_SWAP);
         PLAYER(SPECIES_DURALUDON) { Ability(ABILITY_STALWART); }
         PLAYER(SPECIES_DURALUDON) { Ability(ABILITY_STALWART); }
         OPPONENT(SPECIES_WOBBUFFET);
@@ -279,9 +279,9 @@ DOUBLE_BATTLE_TEST("Instructed move will be redirected by Rage Powder after inst
     PARAMETRIZE { moveTarget = opponentLeft; }
     PARAMETRIZE { moveTarget = opponentRight; }
     GIVEN {
-        ASSUME(GetMoveEffect(MOVE_RAGE_POWDER) == EFFECT_FOLLOW_ME);
-        ASSUME(IsPowderMove(MOVE_RAGE_POWDER) == TRUE);
-        ASSUME(GetMoveEffect(MOVE_SOAK) == EFFECT_SOAK);
+        ASSUME(gMovesInfo[MOVE_RAGE_POWDER].effect == EFFECT_FOLLOW_ME);
+        ASSUME(gMovesInfo[MOVE_RAGE_POWDER].powderMove == TRUE);
+        ASSUME(gMovesInfo[MOVE_SOAK].effect == EFFECT_SOAK);
         PLAYER(SPECIES_TREECKO);
         PLAYER(SPECIES_SCEPTILE);
         OPPONENT(SPECIES_WOBBUFFET);
@@ -302,5 +302,31 @@ DOUBLE_BATTLE_TEST("Instructed move will be redirected by Rage Powder after inst
         ANIMATION(ANIM_TYPE_MOVE, MOVE_INSTRUCT, playerRight);
         ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, playerLeft);
         HP_BAR(opponentLeft);
+    }
+}
+
+DOUBLE_BATTLE_TEST("INNATE: Instructed move will be redirected and absorbed by Lightning Rod if it turns into an Electric Type move")
+{
+    struct BattlePokemon *moveTarget = NULL;
+    PARAMETRIZE { moveTarget = opponentLeft; }
+    PARAMETRIZE { moveTarget = opponentRight; }
+    GIVEN {
+        PLAYER(SPECIES_WOBBUFFET);
+        PLAYER(SPECIES_WYNAUT);
+        OPPONENT(SPECIES_PIKACHU) { Ability(ABILITY_STATIC); Innates(ABILITY_LIGHTNING_ROD); }
+        OPPONENT(SPECIES_WOBBUFFET);
+    } WHEN {
+        TURN {
+            MOVE(playerLeft, MOVE_TACKLE, target: moveTarget);
+            MOVE(opponentLeft, MOVE_PLASMA_FISTS, target: playerLeft);
+            MOVE(playerRight, MOVE_INSTRUCT, target: playerLeft);
+            MOVE(opponentRight, MOVE_CELEBRATE);
+        }
+    } SCENE {
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, playerLeft);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_PLASMA_FISTS, opponentLeft);
+        ANIMATION(ANIM_TYPE_MOVE, MOVE_INSTRUCT, playerRight);
+        ABILITY_POPUP(opponentLeft, ABILITY_LIGHTNING_ROD);
+        NOT ANIMATION(ANIM_TYPE_MOVE, MOVE_TACKLE, playerLeft);
     }
 }

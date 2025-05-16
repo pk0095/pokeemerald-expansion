@@ -1,5 +1,6 @@
 #include "global.h"
 #include "battle.h"
+#include "battle_ai_main.h"
 #include "battle_anim.h"
 #include "battle_controllers.h"
 #include "battle_interface.h"
@@ -62,10 +63,7 @@ void ApplyBattlerVisualsForTeraAnim(u32 battler)
 bool32 CanTerastallize(u32 battler)
 {
     u32 holdEffect = GetBattlerHoldEffect(battler, FALSE);
-    
-    if (gBattleMons[battler].status2 & STATUS2_TRANSFORMED && GET_BASE_SPECIES_ID(gBattleMons[battler].species) == SPECIES_TERAPAGOS)
-        return FALSE;
-    
+
     // Prevents Zigzagoon from terastalizing in vanilla.
     if (gBattleTypeFlags & BATTLE_TYPE_FIRST_BATTLE && GetBattlerSide(battler) == B_SIDE_OPPONENT)
         return FALSE;
@@ -134,7 +132,7 @@ bool32 IsTypeStellarBoosted(u32 battler, u32 type)
 uq4_12_t GetTeraMultiplier(u32 battler, u32 type)
 {
     u32 teraType = GetBattlerTeraType(battler);
-    bool32 hasAdaptability = (GetBattlerAbility(battler) == ABILITY_ADAPTABILITY);
+    bool32 hasAdaptability = (BattlerHasTrait(battler, ABILITY_ADAPTABILITY));
 
     // Safety check.
     if (GetActiveGimmick(battler) != GIMMICK_TERA)

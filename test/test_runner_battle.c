@@ -25,6 +25,7 @@
 #undef TestRunner_Battle_AfterLastTurn
 #undef TestRunner_Battle_CheckBattleRecordActionType
 #undef TestRunner_Battle_GetForcedAbility
+#undef TestRunner_Battle_GetForcedInnates
 #endif
 
 #define INVALID(fmt, ...) Test_ExitWithResult(TEST_RESULT_INVALID, sourceLine, ":L%s:%d: " fmt, gTestRunnerState.test->filename, sourceLine, ##__VA_ARGS__)
@@ -1653,6 +1654,20 @@ void Ability_(u32 sourceLine, u32 ability)
     }
 }
 
+void Innates_(u32 sourceLine, u32 innates[MAX_MON_INNATES])
+{
+    s32 i;
+    INVALID_IF(!DATA.currentMon, "Innates outside of PLAYER/OPPONENT");
+
+    // Overwrites the target pokemon with the given Innate list.
+    // If the list is empty, the pokemon will have no Innates to remain compatible with vanilla tests.
+    for (i = 0; i < MAX_MON_INNATES; i++)
+    {
+        INVALID_IF(innates[i] >= ABILITIES_COUNT, "Illegal ability id: %d", innates[i]);
+        DATA.forcedInnates[DATA.currentSide][DATA.currentPartyIndex][i] = innates[i];
+    }
+}
+
 void Level_(u32 sourceLine, u32 level)
 {
     // TODO: Preserve any explicitly-set stats.
@@ -2034,16 +2049,16 @@ s32 MoveGetTarget(s32 battlerId, u32 moveId, struct MoveContext *ctx, u32 source
     }
     else
     {
-        u32 moveTarget = GetMoveTarget(moveId);
-        if (moveTarget == MOVE_TARGET_RANDOM
-         || moveTarget == MOVE_TARGET_BOTH
-         || moveTarget == MOVE_TARGET_DEPENDS
-         || moveTarget == MOVE_TARGET_FOES_AND_ALLY
-         || moveTarget == MOVE_TARGET_OPPONENTS_FIELD)
+        const struct MoveInfo *move = &gMovesInfo[moveId];
+        if (move->target == MOVE_TARGET_RANDOM
+         || move->target == MOVE_TARGET_BOTH
+         || move->target == MOVE_TARGET_DEPENDS
+         || move->target == MOVE_TARGET_FOES_AND_ALLY
+         || move->target == MOVE_TARGET_OPPONENTS_FIELD)
         {
             target = BATTLE_OPPOSITE(battlerId);
         }
-        else if (moveTarget == MOVE_TARGET_SELECTED || moveTarget == MOVE_TARGET_OPPONENT)
+        else if (move->target == MOVE_TARGET_SELECTED || move->target == MOVE_TARGET_OPPONENT)
         {
             // In AI Doubles not specified target allows any target for EXPECT_MOVE.
             if (GetBattleTest()->type != BATTLE_TEST_AI_DOUBLES)
@@ -2053,11 +2068,11 @@ s32 MoveGetTarget(s32 battlerId, u32 moveId, struct MoveContext *ctx, u32 source
 
             target = BATTLE_OPPOSITE(battlerId);
         }
-        else if (moveTarget == MOVE_TARGET_USER || moveTarget == MOVE_TARGET_ALL_BATTLERS)
+        else if (move->target == MOVE_TARGET_USER || move->target == MOVE_TARGET_ALL_BATTLERS)
         {
             target = battlerId;
         }
-        else if (moveTarget == MOVE_TARGET_ALLY)
+        else if (move->target == MOVE_TARGET_ALLY)
         {
             target = BATTLE_PARTNER(battlerId);
         }
@@ -2743,6 +2758,11 @@ void ValidateFinally(u32 sourceLine)
 u32 TestRunner_Battle_GetForcedAbility(u32 side, u32 partyIndex)
 {
     return DATA.forcedAbilities[side][partyIndex];
+}
+
+u32 TestRunner_Battle_GetForcedInnates(u32 side, u32 partyIndex, s32 i)
+{
+    return DATA.forcedInnates[side][partyIndex][i];
 }
 
 u32 TestRunner_Battle_GetChosenGimmick(u32 side, u32 partyIndex)

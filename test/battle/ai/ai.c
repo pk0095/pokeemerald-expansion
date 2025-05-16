@@ -835,8 +835,8 @@ AI_SINGLE_BATTLE_TEST("AI stays choice locked into moves in spite of the player'
 AI_SINGLE_BATTLE_TEST("AI won't use Sucker Punch if it expects a move of the same priority bracket and the opponent is faster")
 {
     GIVEN {
-        ASSUME(GetMovePriority(MOVE_QUICK_ATTACK) == 1);
-        ASSUME(GetMovePriority(MOVE_SUCKER_PUNCH) == 1);
+        ASSUME(gMovesInfo[MOVE_QUICK_ATTACK].priority == 1);
+        ASSUME(gMovesInfo[MOVE_SUCKER_PUNCH].priority == 1);
         AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
         PLAYER(SPECIES_WOBBUFFET) { Speed(300); Moves(MOVE_QUICK_ATTACK); }
         OPPONENT(SPECIES_WOBBUFFET) { Speed(100); Moves(MOVE_SUCKER_PUNCH, MOVE_TACKLE); }
@@ -861,33 +861,50 @@ AI_SINGLE_BATTLE_TEST("AI_FLAG_SMART_SWITCHING: AI considers Focus Sash when det
     }
 }
 
-AI_SINGLE_BATTLE_TEST("AI sees popped Air Balloon")
+AI_SINGLE_BATTLE_TEST("INNATE: AI prefers Water Gun over Bubble if it knows that foe has Contrary")
 {
+    u32 abilityAI;
+
+    PARAMETRIZE { abilityAI = ABILITY_CONTRARY; }
+    PARAMETRIZE { abilityAI = ABILITY_MOLD_BREAKER; }
     GIVEN {
-        ASSUME(ItemId_GetHoldEffect(ITEM_AIR_BALLOON) == HOLD_EFFECT_AIR_BALLOON);
-        ASSUME(GetMoveType(MOVE_EARTHQUAKE) == TYPE_GROUND);
-        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_TRY_TO_FAINT | AI_FLAG_CHECK_VIABILITY | AI_FLAG_OMNISCIENT);
-        PLAYER(SPECIES_TORCHIC) { Item(ITEM_AIR_BALLOON); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_GEODUDE) { Moves(MOVE_TACKLE, MOVE_EARTHQUAKE); }
+        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT);
+        PLAYER(SPECIES_SHUCKLE) { Ability(ABILITY_GLUTTONY); Innates(abilityAI); }
+        OPPONENT(SPECIES_PINSIR) { Moves(MOVE_WATER_GUN, MOVE_BUBBLE); }
     } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE); EXPECT_MOVE(opponent, MOVE_TACKLE); }
-        TURN { MOVE(player, MOVE_TACKLE); EXPECT_MOVE(opponent, MOVE_EARTHQUAKE); }
+            TURN { MOVE(player, MOVE_DEFENSE_CURL); }
+            TURN { MOVE(player, MOVE_DEFENSE_CURL);
+                   if (abilityAI == ABILITY_MOLD_BREAKER) { SCORE_EQ(opponent, MOVE_WATER_GUN, MOVE_BUBBLE); }
+                   else { SCORE_GT(opponent, MOVE_WATER_GUN, MOVE_BUBBLE); }}
     }
 }
 
-AI_SINGLE_BATTLE_TEST("AI sees popped Air Balloon after Air Balloon mon switches out and back in")
+AI_SINGLE_BATTLE_TEST("INNATE: AI uses a guaranteed KO move instead of the move with the highest expected damage")
 {
+    u32 flags;
+
+    PARAMETRIZE { flags = AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY; }
+    PARAMETRIZE { flags = AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_CHECK_VIABILITY | AI_FLAG_TRY_TO_FAINT; }
+
     GIVEN {
-        ASSUME(ItemId_GetHoldEffect(ITEM_AIR_BALLOON) == HOLD_EFFECT_AIR_BALLOON);
-        ASSUME(GetMoveType(MOVE_EARTHQUAKE) == TYPE_GROUND);
-        AI_FLAGS(AI_FLAG_CHECK_BAD_MOVE | AI_FLAG_TRY_TO_FAINT | AI_FLAG_CHECK_VIABILITY | AI_FLAG_OMNISCIENT);
-        PLAYER(SPECIES_TORCHIC) { Item(ITEM_AIR_BALLOON); Moves(MOVE_TACKLE); }
-        PLAYER(SPECIES_TORCHIC) { Item(ITEM_AIR_BALLOON); Moves(MOVE_TACKLE); }
-        OPPONENT(SPECIES_GEODUDE) { Moves(MOVE_TACKLE, MOVE_EARTHQUAKE); }
+        ASSUME(GetMoveCriticalHitStage(MOVE_SLASH) == 1);
+        ASSUME(GetMovePower(MOVE_SLASH) == 70);
+        ASSUME(GetMovePower(MOVE_STRENGTH) == 80);
+        ASSUME(GetMoveType(MOVE_SLASH) == GetMoveType(MOVE_STRENGTH));
+        ASSUME(GetMoveCategory(MOVE_SLASH) == GetMoveCategory(MOVE_STRENGTH));
+        AI_FLAGS(flags);
+        PLAYER(SPECIES_WOBBUFFET) { HP(225); }
+        OPPONENT(SPECIES_ABSOL) { Ability(ABILITY_PRESSURE); Innates(ABILITY_SUPER_LUCK); Moves(MOVE_SLASH, MOVE_STRENGTH); }
     } WHEN {
-        TURN { MOVE(player, MOVE_TACKLE); EXPECT_MOVE(opponent, MOVE_TACKLE); }
-        TURN { SWITCH(player, 1); EXPECT_MOVE(opponent, MOVE_EARTHQUAKE); }
-        TURN { SWITCH(player, 0); EXPECT_MOVE(opponent, MOVE_TACKLE); }
-        TURN { MOVE(player, MOVE_TACKLE); EXPECT_MOVE(opponent, MOVE_EARTHQUAKE); SEND_OUT(player, 1); }
+        TURN { EXPECT_MOVE(opponent, MOVE_SLASH); }
+        if (flags & AI_FLAG_TRY_TO_FAINT)
+            TURN { EXPECT_MOVE(opponent, MOVE_STRENGTH); }
+        else
+            TURN { EXPECT_MOVE(opponent, MOVE_SLASH); }
+    } SCENE {
+        if (flags & AI_FLAG_TRY_TO_FAINT)
+            MESSAGE("Wobbuffet fainted!");
+        else
+            NOT MESSAGE("Wobbuffet fainted!");
     }
 }
