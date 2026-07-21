@@ -51,7 +51,57 @@
     F(STEEL_WING) \
     F(SKILL_SWAP) \
     F(SNATCH) \
-    F(OVERHEAT)
+    F(OVERHEAT)\
+    F(INFESTATION) \
+    F(POUNCE) \
+    F(SILVER_WIND) \
+    F(U_TURN) \
+    F(X_SCISSOR) \
+    F(BRUTAL_SWING) \
+    F(DARK_PULSE) \
+    F(FLING) \
+    F(HONE_CLAWS) \
+    F(PAYBACK) \
+    F(POWER_TRIP) \
+    F(SNARL) \
+    F(DRAGON_PULSE) \
+    F(DRAGON_TAIL) \
+    F(CHARGE_BEAM) \
+    F(SUPERCELL_SLAM) \
+    F(VOLT_SWITCH) \
+    F(WILD_CHARGE) \
+    F(ALLURING_VOICE) \
+    F(DAZZLING_GLEAM) \
+    F(DRAINING_KISS) \
+    F(PLAY_ROUGH) \
+    F(BODY_PRESS) \
+    F(DRAIN_PUNCH) \
+    F(FOCUS_BLAST) \
+    F(LOW_SWEEP) \
+    F(POWER_UP_PUNCH) \
+    F(FLAME_CHARGE) \
+    F(INCINERATE) \
+    F(TEMPER_FLARE) \
+    F(WILL_O_WISP) \
+    F(ACROBATICS) \
+    F(DEFOG) \
+    F(HURRICANE) \
+    F(PLUCK) \
+    F(ROOST) \
+    F(TAILWIND) \
+    F(PHANTOM_FORCE) \
+    F(SHADOW_CLAW) \
+    F(ENERGY_BALL) \
+    F(GRASS_KNOT) \
+    F(TRAILBLAZE) \
+    F(BULLDOZE) \
+    F(EARTH_POWER) \
+    F(AURORA_VEIL) \
+    F(AVALANCHE) \
+    F(ICE_SPINNER) \
+    F(ECHOED_VOICE) \
+    F(GIGA_IMPACT) \
+    F(NATURAL_GIFT)
 
 #define FOREACH_HM(F) \
     F(CUT) \

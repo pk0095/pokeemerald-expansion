@@ -664,14 +664,14 @@
 #define FLAG_HIDDEN_ITEM_ROUTE_123_RARE_CANDY                (FLAG_HIDDEN_ITEMS_START + 0x6E)
 #define FLAG_HIDDEN_ITEM_ROUTE_105_BIG_PEARL                 (FLAG_HIDDEN_ITEMS_START + 0x6F)
 
-#define FLAG_UNUSED_0x264  0x264 // Unused Flag
-#define FLAG_UNUSED_0x265  0x265 // Unused Flag
-#define FLAG_UNUSED_0x266  0x266 // Unused Flag
-#define FLAG_UNUSED_0x267  0x267 // Unused Flag
-#define FLAG_UNUSED_0x268  0x268 // Unused Flag
-#define FLAG_UNUSED_0x269  0x269 // Unused Flag
-#define FLAG_UNUSED_0x26A  0x26A // Unused Flag
-#define FLAG_UNUSED_0x26B  0x26B // Unused Flag
+#define FLAG_EXP_SHARE_TOGGLE  0x264 // EXP Share toggle
+#define FLAG_FOLLOWER_AUTO_HEAL     0x265 // Automatically heal after follower battles
+#define FLAG_FOLLOWER_WILD_BATTLE_PARTNER  0x266 // Follower joins wild battles
+#define FLAG_ORAS_DOWSING_MACHINE  0x267 // Dowsing Machine toggle
+#define FLAG_FORCE_SHINY  0x268 // Force Shiny toggle
+#define FLAG_FORCE_NO_SHINY  0x269 // Force Not Shiny toggle
+#define FLAG_SUMMARY_EGG_MOVE_RELEARNER  0x26A // Egg Move Relearner toggle
+#define FLAG_SUMMARY_TUTOR_MOVE_RELEARNER  0x26B // Tutor Move Relearner toggle
 #define FLAG_UNUSED_0x26C  0x26C // Unused Flag
 #define FLAG_UNUSED_0x26D  0x26D // Unused Flag
 #define FLAG_UNUSED_0x26E  0x26E // Unused Flag
@@ -2360,11 +2360,18 @@
 #define FLAG_DEFEATED_LANCE           0
 #define FLAG_DEFEATED_CHAMP           0
 
-#define FLAG_0x82A                                                  0
-#define FLAG_0x82B                                                  0
+#define FLAG_DEXNAV_SEARCHING                                       0x82A
+#define FLAG_DEXNAV_UNLOCKED                                        0x82B
 #define FLAG_SYS_SET_TRAINER_CARD_PROFILE                           0
-#define FLAG_0x82E                                                  0
+#define FLAG_DEXNAV_DETECTOR_MODE                                   0x82E
 #define FLAG_SYS_ON_CYCLING_ROAD                                    0
+#define FLAG_SYS_SAW_HELP_SYSTEM_INTRO                              0
+#define FLAG_OPENED_START_MENU                                      0 
+#define FLAG_SYS_PC_STORAGE_DISABLED                                0
+#define FLAG_SYS_SEVII_MAP_123                                      0
+#define FLAG_SYS_SEVII_MAP_4567                                     0
+#define FLAG_SYS_GOT_BERRY_POUCH                                    0
+#define FLAG_SYS_UNLOCKED_TANOBY_RUINS                              0
 #define FLAG_0x831                                                  0
 #define FLAG_0x832                                                  0
 #define FLAG_0x833                                                  0

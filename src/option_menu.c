@@ -1,4 +1,5 @@
 #include "global.h"
+#include "event_data.h"
 #include "option_menu.h"
 #include "bg.h"
 #include "gpu_regs.h"
@@ -23,6 +24,7 @@
 #define tSound data[4]
 #define tButtonMode data[5]
 #define tWindowFrameType data[6]
+#define tSeason data[7]
 
 enum
 {
@@ -32,6 +34,7 @@ enum
     MENUITEM_SOUND,
     MENUITEM_BUTTONMODE,
     MENUITEM_FRAMETYPE,
+    MENUITEM_SEASON,
     MENUITEM_CANCEL,
     MENUITEM_COUNT,
 };
@@ -42,12 +45,15 @@ enum
     WIN_OPTIONS
 };
 
-#define YPOS_TEXTSPEED    (MENUITEM_TEXTSPEED * 16)
-#define YPOS_BATTLESCENE  (MENUITEM_BATTLESCENE * 16)
-#define YPOS_BATTLESTYLE  (MENUITEM_BATTLESTYLE * 16)
-#define YPOS_SOUND        (MENUITEM_SOUND * 16)
-#define YPOS_BUTTONMODE   (MENUITEM_BUTTONMODE * 16)
-#define YPOS_FRAMETYPE    (MENUITEM_FRAMETYPE * 16)
+#define VISIBLE_ROWS 7
+static u8 sScrollOffset = 0;
+#define YPOS_TEXTSPEED    ((MENUITEM_TEXTSPEED - sScrollOffset) * 16)
+#define YPOS_BATTLESCENE  ((MENUITEM_BATTLESCENE - sScrollOffset) * 16)
+#define YPOS_BATTLESTYLE  ((MENUITEM_BATTLESTYLE - sScrollOffset) * 16)
+#define YPOS_SOUND        ((MENUITEM_SOUND - sScrollOffset) * 16)
+#define YPOS_BUTTONMODE   ((MENUITEM_BUTTONMODE - sScrollOffset) * 16)
+#define YPOS_FRAMETYPE    ((MENUITEM_FRAMETYPE - sScrollOffset) * 16)
+#define YPOS_SEASON       ((MENUITEM_SEASON - sScrollOffset) * 16)
 
 static void Task_OptionMenuFadeIn(u8 taskId);
 static void Task_OptionMenuProcessInput(u8 taskId);
@@ -66,6 +72,10 @@ static u8 FrameType_ProcessInput(u8 selection);
 static void FrameType_DrawChoices(u8 selection);
 static u8 ButtonMode_ProcessInput(u8 selection);
 static void ButtonMode_DrawChoices(u8 selection);
+static u8 Season_ProcessInput(u8 selection);
+static void Season_DrawChoices(u8 selection);
+static void UpdateOptionMenuScroll(u8 taskId);
+static void RedrawVisibleOptionValues(u8 taskId);
 static void DrawHeaderText(void);
 static void DrawOptionMenuTexts(void);
 static void DrawBgWindowFrames(void);
@@ -92,6 +102,10 @@ static const u16 sOptionMenuText_Pal[] = INCGFX_U16("graphics/interface/option_m
 // note: this is only used in the Japanese release
 static const u8 sEqualSignGfx[] = INCGFX_U8("graphics/interface/option_menu_equals_sign.png", ".4bpp");
 
+static const u8 gText_SeasonSpring[]  = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}SPRING");
+static const u8 gText_SeasonSummer[]  = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}SUMMER");
+static const u8 gText_SeasonAutumn[]  = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}AUTUMN");
+static const u8 gText_SeasonWinter[]  = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}WINTER");
 static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
 {
     [MENUITEM_TEXTSPEED]   = COMPOUND_STRING("TEXT SPEED"),
@@ -100,6 +114,7 @@ static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
     [MENUITEM_SOUND]       = COMPOUND_STRING("SOUND"),
     [MENUITEM_BUTTONMODE]  = COMPOUND_STRING("BUTTON MODE"),
     [MENUITEM_FRAMETYPE]   = COMPOUND_STRING("FRAME"),
+    [MENUITEM_SEASON]      = COMPOUND_STRING("SEASON"),
     [MENUITEM_CANCEL]      = COMPOUND_STRING("CANCEL"),
 };
 
@@ -250,6 +265,7 @@ void CB2_InitOptionMenu(void)
         gTasks[taskId].tSound = gSaveBlock2Ptr->optionsSound;
         gTasks[taskId].tButtonMode = gSaveBlock2Ptr->optionsButtonMode;
         gTasks[taskId].tWindowFrameType = gSaveBlock2Ptr->optionsWindowFrameType;
+        gTasks[taskId].tSeason = getCurrentSeason();
 
         TextSpeed_DrawChoices(gTasks[taskId].tTextSpeed);
         BattleScene_DrawChoices(gTasks[taskId].tBattleSceneOff);
@@ -257,6 +273,8 @@ void CB2_InitOptionMenu(void)
         Sound_DrawChoices(gTasks[taskId].tSound);
         ButtonMode_DrawChoices(gTasks[taskId].tButtonMode);
         FrameType_DrawChoices(gTasks[taskId].tWindowFrameType);
+        Season_DrawChoices(gTasks[taskId].tSeason);
+        UpdateOptionMenuScroll(taskId);
         HighlightOptionMenuItem(gTasks[taskId].tMenuSelection);
 
         CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
@@ -294,6 +312,7 @@ static void Task_OptionMenuProcessInput(u8 taskId)
             gTasks[taskId].tMenuSelection--;
         else
             gTasks[taskId].tMenuSelection = MENUITEM_CANCEL;
+        UpdateOptionMenuScroll(taskId);
         HighlightOptionMenuItem(gTasks[taskId].tMenuSelection);
     }
     else if (JOY_NEW(DPAD_DOWN))
@@ -302,6 +321,7 @@ static void Task_OptionMenuProcessInput(u8 taskId)
             gTasks[taskId].tMenuSelection++;
         else
             gTasks[taskId].tMenuSelection = 0;
+        UpdateOptionMenuScroll(taskId);
         HighlightOptionMenuItem(gTasks[taskId].tMenuSelection);
     }
     else
@@ -352,6 +372,13 @@ static void Task_OptionMenuProcessInput(u8 taskId)
             if (previousOption != gTasks[taskId].tWindowFrameType)
                 FrameType_DrawChoices(gTasks[taskId].tWindowFrameType);
             break;
+        case MENUITEM_SEASON:
+            previousOption = gTasks[taskId].tSeason;
+            gTasks[taskId].tSeason = Season_ProcessInput(gTasks[taskId].tSeason);
+
+            if (previousOption != gTasks[taskId].tSeason)
+                Season_DrawChoices(gTasks[taskId].tSeason);
+            break;
         default:
             return;
         }
@@ -372,6 +399,7 @@ static void Task_OptionMenuSave(u8 taskId)
     gSaveBlock2Ptr->optionsSound = gTasks[taskId].tSound;
     gSaveBlock2Ptr->optionsButtonMode = gTasks[taskId].tButtonMode;
     gSaveBlock2Ptr->optionsWindowFrameType = gTasks[taskId].tWindowFrameType;
+    SetCurrentSeason(gTasks[taskId].tSeason);
 
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
     gTasks[taskId].func = Task_OptionMenuFadeOut;
@@ -389,8 +417,10 @@ static void Task_OptionMenuFadeOut(u8 taskId)
 
 static void HighlightOptionMenuItem(u8 index)
 {
+    u8 row = index - sScrollOffset;
+
     SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(16, DISPLAY_WIDTH - 16));
-    SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(index * 16 + 40, index * 16 + 56));
+    SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(row * 16 + 40, row * 16 + 56));
 }
 
 static void DrawOptionMenuChoice(const u8 *text, u8 x, u8 y, u8 style)
@@ -631,6 +661,50 @@ static void ButtonMode_DrawChoices(u8 selection)
     DrawOptionMenuChoice(gText_ButtonTypeLEqualsA, GetStringRightAlignXOffset(FONT_NORMAL, gText_ButtonTypeLEqualsA, 198), YPOS_BUTTONMODE, styles[2]);
 }
 
+static u8 Season_ProcessInput(u8 selection)
+{
+    if (JOY_NEW(DPAD_RIGHT))
+    {
+        if (selection < SEASON_WINTER)
+            selection++;
+        else
+            selection = SEASON_SPRING;
+        sArrowPressed = TRUE;
+    }
+    if (JOY_NEW(DPAD_LEFT))
+    {
+        if (selection > SEASON_SPRING)
+            selection--;
+        else
+            selection = SEASON_WINTER;
+        sArrowPressed = TRUE;
+    }
+    return selection;
+}
+
+static void Season_DrawChoices(u8 selection)
+{
+    const u8 *text;
+
+    switch (selection)
+    {
+    case SEASON_SUMMER:
+        text = gText_SeasonSummer;
+        break;
+    case SEASON_AUTUMN:
+        text = gText_SeasonAutumn;
+        break;
+    case SEASON_WINTER:
+        text = gText_SeasonWinter;
+        break;
+    case SEASON_SPRING:
+    default:
+        text = gText_SeasonSpring;
+        break;
+    }
+    DrawOptionMenuChoice(text, GetStringRightAlignXOffset(FONT_NORMAL, text, 198), YPOS_SEASON, 1);
+}
+
 static void DrawHeaderText(void)
 {
     FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(1));
@@ -644,8 +718,43 @@ static void DrawOptionMenuTexts(void)
 
     FillWindowPixelBuffer(WIN_OPTIONS, PIXEL_FILL(1));
     for (i = 0; i < MENUITEM_COUNT; i++)
-        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sOptionMenuItemsNames[i], 8, (i * 16) + 1, TEXT_SKIP_DRAW, NULL);
+    {
+        if (i < sScrollOffset || i >= sScrollOffset + VISIBLE_ROWS)
+            continue;
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sOptionMenuItemsNames[i], 8, ((i - sScrollOffset) * 16) + 1, TEXT_SKIP_DRAW, NULL);
+    }
     CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
+}
+
+static void RedrawVisibleOptionValues(u8 taskId)
+{
+    if (sScrollOffset == 0)
+        TextSpeed_DrawChoices(gTasks[taskId].tTextSpeed);
+    BattleScene_DrawChoices(gTasks[taskId].tBattleSceneOff);
+    BattleStyle_DrawChoices(gTasks[taskId].tBattleStyle);
+    Sound_DrawChoices(gTasks[taskId].tSound);
+    ButtonMode_DrawChoices(gTasks[taskId].tButtonMode);
+    FrameType_DrawChoices(gTasks[taskId].tWindowFrameType);
+    Season_DrawChoices(gTasks[taskId].tSeason);
+}
+
+static void UpdateOptionMenuScroll(u8 taskId)
+{
+    u8 selection = gTasks[taskId].tMenuSelection;
+    u8 newScrollOffset = sScrollOffset;
+
+    if (selection < sScrollOffset)
+        newScrollOffset = selection;
+    else if (selection >= sScrollOffset + VISIBLE_ROWS)
+        newScrollOffset = selection - VISIBLE_ROWS + 1;
+
+    if (newScrollOffset != sScrollOffset)
+    {
+        sScrollOffset = newScrollOffset;
+        DrawOptionMenuTexts();
+        RedrawVisibleOptionValues(taskId);
+        CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
+    }
 }
 
 #define TILE_TOP_CORNER_L 0x1A2

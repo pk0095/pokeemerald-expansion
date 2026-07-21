@@ -9,6 +9,7 @@
 #include "battle_hold_effects.h"
 #include "battle_interface.h"
 #include "battle_main.h"
+#include "level_scaling.h"
 #include "battle_message.h"
 #include "battle_pyramid.h"
 #include "battle_scripts.h"
@@ -1915,7 +1916,16 @@ u8 CreateNPCTrainerPartyFromTrainer(struct Pokemon *party, const struct Trainer 
                 otId.method = OT_ID_PRESET;
                 otId.value = HIHALF(personalityValue) ^ LOHALF(personalityValue);
             }
-            CreateMon(&party[i], partyData[monIndex].species, partyData[monIndex].lvl, personalityValue, otId);
+            u16 scaledLevel = partyData[monIndex].lvl;
+            u16 scaledSpecies = partyData[monIndex].species;
+            const struct LevelScalingConfig *scalingConfig = GetTrainerLevelScalingConfig(TRAINER_BATTLE_PARAM.opponentA);
+            if (scalingConfig != NULL)
+            {
+                u8 playerBaseLevel = CalculatePlayerPartyBaseLevel(scalingConfig->mode, scalingConfig->excludeFainted);
+                scaledLevel = CalculateScaledLevel(scalingConfig, playerBaseLevel);
+                scaledSpecies = ValidateSpeciesForLevel(partyData[monIndex].species, scaledLevel, scalingConfig->manageEvolutions);
+            }
+            CreateMon(&party[i], scaledSpecies, scaledLevel, personalityValue, otId);
             SetMonData(&party[i], MON_DATA_HELD_ITEM, &partyData[monIndex].heldItem);
 
             CustomTrainerPartyAssignMoves(&party[i], &partyData[monIndex]);
@@ -3269,8 +3279,10 @@ void FaintClearSetData(enum BattlerId battler)
         gBattleMons[battler].statStages[i] = DEFAULT_STAT_STAGE;
 
     bool32 keepTransformed = gBattleMons[battler].volatiles.transformed;
+    enum Species originalSpecies = gBattleMons[battler].volatiles.transformedMonSpecies;
     memset(&gBattleMons[battler].volatiles, 0, sizeof(struct Volatiles));
     gBattleMons[battler].volatiles.transformed = keepTransformed; // Edge case: Keep Transformed status to prevent triggering FORM_CHANGE_FAINT on transformed mons.
+    gBattleMons[battler].volatiles.transformedMonSpecies = originalSpecies; // Also keep transformed species for ev and exp calculation
 
     for (enum BattlerId i = 0; i < gBattlersCount; i++)
     {

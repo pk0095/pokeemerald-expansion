@@ -39,6 +39,9 @@ const struct Tileset gTileset_General =
     .metatiles = gMetatiles_General,
     .metatileAttributes = gMetatileAttributes_General,
     .callback = InitTilesetAnim_General,
+    .palettes_summer = gTilesetPalettes_General_Summer,
+    .palettes_autumn = gTilesetPalettes_General_Autumn,
+    .palettes_winter = gTilesetPalettes_General_Winter,
 };
 
 const struct Tileset gTileset_Petalburg =
@@ -555,7 +558,7 @@ const struct Tileset gTileset_MauvilleGameCorner =
     .palettes = gTilesetPalettes_MauvilleGameCorner,
     .metatiles = gMetatiles_MauvilleGameCorner,
     .metatileAttributes = gMetatileAttributes_MauvilleGameCorner,
-    .callback = NULL,
+    .callback = InitTilesetAnim_MauvilleGameCorner,
 };
 
 const struct Tileset gTileset_RustboroGym =

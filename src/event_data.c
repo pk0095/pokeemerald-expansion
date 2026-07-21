@@ -274,3 +274,16 @@ bool8 FlagGet(u16 id)
 
     return TRUE;
 }
+
+// Season is set manually via script (VarSet VAR_CURRENT_SEASON, SEASON_*).
+// No automatic date-based cycling is implemented.
+#define VAR_CURRENT_SEASON VAR_UNUSED_0x404E
+u8 getCurrentSeason(void)
+{
+    return VarGet(VAR_CURRENT_SEASON);
+}
+
+void SetCurrentSeason(u8 season)
+{
+    VarSet(VAR_CURRENT_SEASON, season);
+}

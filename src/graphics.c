@@ -2042,6 +2042,66 @@ const u16 ALIGNED(4) gTilesetPalettes_General[][16] =
     INCGFX_U16("data/tilesets/primary/general/palettes/15.pal", ".gbapal"),
 };
 
+const u16 ALIGNED(4) gTilesetPalettes_General_Summer[][16] =
+{
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/00.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/01.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/02.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/03.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/04.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/05.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/06.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/07.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/08.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/09.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/10.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/11.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/12.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/13.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/14.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_summer/15.pal", ".gbapal"),
+};
+
+const u16 ALIGNED(4) gTilesetPalettes_General_Autumn[][16] =
+{
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/00.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/01.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/02.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/03.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/04.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/05.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/06.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/07.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/08.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/09.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/10.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/11.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/12.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/13.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/14.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_autumn/15.pal", ".gbapal"),
+};
+
+const u16 ALIGNED(4) gTilesetPalettes_General_Winter[][16] =
+{
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/00.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/01.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/02.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/03.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/04.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/05.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/06.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/07.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/08.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/09.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/10.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/11.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/12.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/13.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/14.pal", ".gbapal"),
+    INCGFX_U16("data/tilesets/primary/general/palettes_winter/15.pal", ".gbapal"),
+};
+
 const u32 gTilesetTiles_General[] = INCGFX_U32("data/tilesets/primary/general/tiles.png", ".4bpp.smol");
 
 // trade/egg hatch

@@ -9,7 +9,7 @@
 #define SHOULD_SWITCH_WONDER_GUARD_PERCENTAGE                   100
 #define SHOULD_SWITCH_TRUANT_PERCENTAGE                         100
 #define SHOULD_SWITCH_ALL_MOVES_BAD_PERCENTAGE                  100
-#define STAY_IN_STATS_RAISED                                    2  // Number of stat stages that must be raised across any stats before the AI won't switch mon out in certain cases
+#define STAY_IN_STATS_RAISED                                    3  // Number of stat stages that must be raised across any stats before the AI won't switch mon out in certain cases
 
 // AI smart switching chances; if you want more complex behaviour, modify GetSwitchChance
 #define SHOULD_SWITCH_ABSORBS_MOVE_PERCENTAGE                       100
@@ -25,16 +25,16 @@
 #define SHOULD_SWITCH_ATTACKING_STAT_MINUS_THREE_PLUS_PERCENTAGE    100
 #define SHOULD_SWITCH_ALL_SCORES_BAD_PERCENTAGE                     100
 #define SHOULD_SWITCH_DYN_FUNC_PERCENTAGE                           50 // Dynamic switching function switch chance
-#define SHOULD_SWITCH_LOSES_1V1_PERCENTAGE                          0 // Keeping this disabled by default makes evaluating and testing switching behaviour when developing much easier
+#define SHOULD_SWITCH_LOSES_1V1_PERCENTAGE                          50 // Keeping this disabled by default makes evaluating and testing switching behaviour when developing much easier
 
 // AI smart switching chances for bad statuses
 #define SHOULD_SWITCH_PERISH_SONG_PERCENTAGE                    100
 #define SHOULD_SWITCH_YAWN_PERCENTAGE                           100
-#define SHOULD_SWITCH_BADLY_POISONED_PERCENTAGE                 50
+#define SHOULD_SWITCH_BADLY_POISONED_PERCENTAGE                 75
 #define SHOULD_SWITCH_BADLY_POISONED_STATS_RAISED_PERCENTAGE    20
-#define SHOULD_SWITCH_CURSED_PERCENTAGE                         50
+#define SHOULD_SWITCH_CURSED_PERCENTAGE                         75
 #define SHOULD_SWITCH_CURSED_STATS_RAISED_PERCENTAGE            20
-#define SHOULD_SWITCH_NIGHTMARE_PERCENTAGE                      33
+#define SHOULD_SWITCH_NIGHTMARE_PERCENTAGE                      50
 #define SHOULD_SWITCH_NIGHTMARE_STATS_RAISED_PERCENTAGE         15
 #define SHOULD_SWITCH_SEEDED_PERCENTAGE                         25
 #define SHOULD_SWITCH_SEEDED_STATS_RAISED_PERCENTAGE            10
@@ -69,8 +69,8 @@
 // AI move scoring
 #define STATUS_MOVE_FOCUS_PUNCH_CHANCE                          50 // Chance the AI will use a status move if the player's best move is Focus Punch
 #define BOOST_INTO_HAZE_CHANCE                                  0 // Chance the AI will use a stat boosting move if the player has used Haze
-#define SHOULD_RECOVER_CHANCE                                   50 // Chance the AI will give recovery moves score increase if less than ENABLE_RECOVERY_THRESHOLD and in no immediate danger
-#define ENABLE_RECOVERY_THRESHOLD                               60 // HP percentage beneath which SHOULD_RECOVER_CHANCE is active
+#define SHOULD_RECOVER_CHANCE                                   75 // Chance the AI will give recovery moves score increase if less than ENABLE_RECOVERY_THRESHOLD and in no immediate danger
+#define ENABLE_RECOVERY_THRESHOLD                               50 // HP percentage beneath which SHOULD_RECOVER_CHANCE is active
 #define SUCKER_PUNCH_CHANCE                                     50 // Chance for the AI to not use Sucker Punch if the player has a status move
 #define SUCKER_PUNCH_PREDICTION_CHANCE                          50 // Additional chance for the AI to not use Sucker Punch if actively predicting a status move if SUCKER_PUNCH_CHANCE fails
 #define PRIORITIZE_LAST_CHANCE_CHANCE                           50 // Chance the AI will prioritize Last Chance (priority move in the face of being outsped and KO'd) over Slow KO
@@ -80,7 +80,7 @@
 #define EXPLOSION_MINIMUM_CHANCE                                0 // Lowest possible percent chance of the AI using explosion based on its current HP
 #define EXPLOSION_MAXIMUM_CHANCE                                90 // Highest possible percent chance of the AI using explosion based on its current HP
 #define FINAL_GAMBIT_CHANCE                                     50 // Chance for AI to consider using Final Gambit if it outspeeds the player and thinks it has more HP
-#define SHOULD_PIVOT_BREAK_SASH_CHANCE                          50 // Chance for ShouldPivot to return true when trying to break Multiscale and Focus Sash type effects while having a good switchin
+#define SHOULD_PIVOT_BREAK_SASH_CHANCE                          75 // Chance for ShouldPivot to return true when trying to break Multiscale and Focus Sash type effects while having a good switchin
 #define FAKE_OUT_SAVE_ALLY_CHANCE                               50 // Chance for AI to Fake Out to save its ally when ally is fast KO'd by both opponents
 
 // AI damage calc considerations
@@ -105,7 +105,7 @@
 #define AI_ROLL_ATTACKING_PARTNER                               AI_ROLL_MAX
 
 // AI prediction chances
-#define PREDICT_SWITCH_CHANCE                                   50
+#define PREDICT_SWITCH_CHANCE                                   75
 #define PREDICT_MOVE_CHANCE                                     100
 
 // AI Terastalization chances
@@ -128,7 +128,7 @@
 #define ASSUME_ALL_STATUS_ODDS                          25 // Chance for the AI to see any kind of status move.
 
 // AI_FLAG_SMART_SWITCHING settings
-#define SMART_SWITCHING_OMNISCIENT                              FALSE // AI will use omniscience for switching calcs, regardless of omniscience setting otherwise
+#define SMART_SWITCHING_OMNISCIENT                              TRUE // AI will use omniscience for switching calcs, regardless of omniscience setting otherwise
 
 // AI_FLAG_RANDOMIZE_SWITCHIN settings
 #define RANDOMIZE_SWITCHIN_ANY_VALID                            TRUE // If AI has no good candidate mons, it will still choose randomly from all valid options rather than defaulting to the last one in party order

@@ -106,6 +106,9 @@ struct Tileset
     /*0x0C*/ const u16 *metatiles;
     /*0x10*/ const u16 *metatileAttributes;
     /*0x14*/ TilesetCB callback;
+    const u16 (*palettes_summer)[16]; // NULL falls back to `palettes` (spring/default)
+    const u16 (*palettes_autumn)[16]; // NULL falls back to `palettes` (spring/default)
+    const u16 (*palettes_winter)[16]; // NULL falls back to `palettes` (spring/default)
 };
 
 struct MapLayout

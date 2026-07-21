@@ -23,6 +23,7 @@
 #include "config/debug.h"
 #include "config/dexnav.h"
 #include "config/follower_npc.h"
+#include "config/game_corner_expansion.h"
 #include "config/general.h"
 #include "config/item.h"
 #include "config/map_preview_screen.h"
@@ -110,11 +111,11 @@ enum Language
 #define ROAMER_COUNT 1 // Number of maximum concurrent active roamers
 
 // Bag constants
-#define BAG_ITEMS_COUNT 30
-#define BAG_KEYITEMS_COUNT 30
-#define BAG_POKEBALLS_COUNT 16
-#define BAG_TMHM_COUNT 64
-#define BAG_BERRIES_COUNT 46
+#define BAG_ITEMS_COUNT 620
+#define BAG_KEYITEMS_COUNT 90
+#define BAG_POKEBALLS_COUNT 30
+#define BAG_TMHM_COUNT 108
+#define BAG_BERRIES_COUNT 70
 
 // Number of facilities for Ranking Hall.
 // 7 facilities for single mode + tower double mode + tower multi mode.
@@ -231,4 +232,10 @@ enum Connection
 #include "config/test.h"
 #endif
 
+
+#define SEASON_SPRING 0
+#define SEASON_SUMMER 1
+#define SEASON_AUTUMN 2
+#define SEASON_WINTER 3
 #endif // GUARD_CONSTANTS_GLOBAL_H
+

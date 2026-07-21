@@ -18,6 +18,7 @@
 #include "frontier_pass.h"
 #include "frontier_util.h"
 #include "gpu_regs.h"
+#include "rtc.h"
 #include "international_string_util.h"
 #include "item_menu.h"
 #include "link.h"
@@ -86,6 +87,7 @@ COMMON_DATA bool8 (*gMenuCallback)(void) = NULL;
 // EWRAM
 EWRAM_DATA static u8 sSafariBallsWindowId = 0;
 EWRAM_DATA static u8 sBattlePyramidFloorWindowId = 0;
+EWRAM_DATA static u8 sClockWindowId = 0;
 EWRAM_DATA static u8 sStartMenuCursorPos = 0;
 EWRAM_DATA static u8 sNumStartMenuActions = 0;
 EWRAM_DATA static u8 sCurrentStartMenuActions[9] = {0};
@@ -186,6 +188,15 @@ static const struct WindowTemplate sWindowTemplate_PyramidPeak = {
     .paletteNum = 15,
     .baseBlock = 0x8
 };
+static const struct WindowTemplate sWindowTemplate_Clock = {
+    .bg = 0,
+    .tilemapLeft = 1,
+    .tilemapTop = 5,
+    .width = 9,
+    .height = 4,
+    .paletteNum = 15,
+    .baseBlock = 0x40
+};
 
 static const u8 sText_MenuDebug[] = _("DEBUG");
 
@@ -259,6 +270,7 @@ static void BuildMultiPartnerRoomStartMenu(void);
 static void ShowSafariBallsWindow(void);
 static void ShowPyramidFloorWindow(void);
 static void RemoveExtraStartMenuWindows(void);
+static void ShowClockWindow(void);
 static bool32 PrintStartMenuActions(s8 *pIndex, u32 count);
 static bool32 InitStartMenuStep(void);
 static void InitStartMenu(void);
@@ -472,6 +484,17 @@ static void ShowPyramidFloorWindow(void)
     CopyWindowToVram(sBattlePyramidFloorWindowId, COPYWIN_GFX);
 }
 
+static void ShowClockWindow(void)
+{
+    u8 clockText[16];
+    sClockWindowId = AddWindow(&sWindowTemplate_Clock);
+    PutWindowTilemap(sClockWindowId);
+    DrawStdWindowFrame(sClockWindowId, FALSE);
+    RtcCalcLocalTime();
+    FormatDecimalTimeWithoutSeconds(clockText, gLocalTime.hours, gLocalTime.minutes, B_START_MENU_CLOCK_24_HR);
+    AddTextPrinterParameterized(sClockWindowId, FONT_NORMAL, clockText, 4, 1, TEXT_SKIP_DRAW, NULL);
+    CopyWindowToVram(sClockWindowId, COPYWIN_GFX);
+}
 static void RemoveExtraStartMenuWindows(void)
 {
     if (GetSafariZoneFlag())
@@ -485,6 +508,11 @@ static void RemoveExtraStartMenuWindows(void)
         ClearStdWindowAndFrameToTransparent(sBattlePyramidFloorWindowId, FALSE);
         RemoveWindow(sBattlePyramidFloorWindowId);
     }
+#if B_START_MENU_CLOCK == TRUE
+    ClearStdWindowAndFrameToTransparent(sClockWindowId, FALSE);
+    CopyWindowToVram(sClockWindowId, COPYWIN_GFX);
+    RemoveWindow(sClockWindowId);
+#endif
 }
 
 static bool32 PrintStartMenuActions(s8 *pIndex, u32 count)
@@ -542,6 +570,9 @@ static bool32 InitStartMenuStep(void)
             ShowSafariBallsWindow();
         if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
             ShowPyramidFloorWindow();
+#if B_START_MENU_CLOCK == TRUE
+        ShowClockWindow();
+#endif
         sInitStartMenuData[0]++;
         break;
     case 4:
