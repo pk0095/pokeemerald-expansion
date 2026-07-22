@@ -267,6 +267,8 @@ u16 ValidateSpeciesForLevel(u16 species, u8 level, bool8 manageEvolutions)
             u16 target = evolutions[j].targetSpecies;
             if (SanitizeSpeciesId(target) == SPECIES_NONE)
                 continue;
+            if (evolutions[j].method != EVO_LEVEL)
+                continue; // only level-based evolutions are safe to auto-apply here
             if (IsSpeciesLegalAtLevel(target, level))
             {
                 nextSpecies = target;
@@ -285,13 +287,22 @@ u16 ValidateSpeciesForLevel(u16 species, u8 level, bool8 manageEvolutions)
 
 u8 CalculateWildScaledLevel(u16 species, u8 level)
 {
-    const struct LevelScalingConfig config = LEVEL_SCALING_CONFIG_PARTY_AVG;
+    const struct LevelScalingConfig config = {
+        .mode = B_WILD_SCALING_DEFAULT_MODE,
+        .levelAugmentAdd = B_WILD_SCALING_LEVEL_AUGMENT,
+        .levelVariationPct = B_WILD_SCALING_LEVEL_VARIATION_PCT,
+        .minLevel = B_WILD_SCALING_MIN_LEVEL,
+        .maxLevel = B_WILD_SCALING_MAX_LEVEL,
+        .manageEvolutions = B_WILD_SCALING_MANAGE_EVOLUTIONS,
+        .excludeFainted = B_WILD_SCALING_EXCLUDE_FAINTED,
+    };
     u8 baseLevel;
     u8 scaledLevel;
 
     if (!B_WILD_SCALING_ENABLED)
         return level;
 
+    InvalidatePartyLevelCache();
     baseLevel = CalculatePlayerPartyBaseLevel(B_WILD_SCALING_DEFAULT_MODE, B_WILD_SCALING_EXCLUDE_FAINTED);
 
     // Wild mons scale off the player's party, not their own listed level,
