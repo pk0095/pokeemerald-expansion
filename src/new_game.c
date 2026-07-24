@@ -237,6 +237,8 @@ void NewGameInitData(void)
     ResetItemFlags();
     ResetDexNav();
     ClearFollowerNPCData();
+
+    FlagSet(FLAG_DEXNAV_UNLOCKED);
 }
 
 static void ResetMiniGamesRecords(void)
