@@ -11,11 +11,13 @@
 #include "field_player_avatar.h"
 #include "fieldmap.h"
 #include "follower_npc.h"
+#include "item.h"
 #include "menu.h"
 #include "metatile_behavior.h"
 #include "oras_dowse.h"
 #include "overworld.h"
 #include "party_menu.h"
+#include "pokemon.h"
 #include "random.h"
 #include "rotating_gate.h"
 #include "rtc.h"
@@ -1625,10 +1627,24 @@ bool8 PartyHasMonWithSurf(void)
     {
         for (i = 0; i < PARTY_SIZE; i++)
         {
-            if (GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_SPECIES) == SPECIES_NONE)
+            enum Species species = GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_SPECIES);
+            if (species == SPECIES_NONE)
                 break;
             if (MonKnowsMove(&gParties[B_TRAINER_PLAYER][i], MOVE_SURF))
                 return TRUE;
+        }
+
+        // No party member currently knows Surf - allow it if one CAN learn it and we have the HM
+        if (CheckBagHasItem(GetTMHMItemIdFromMoveId(MOVE_SURF), 1))
+        {
+            for (i = 0; i < PARTY_SIZE; i++)
+            {
+                enum Species species = GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_SPECIES);
+                if (species == SPECIES_NONE)
+                    break;
+                if (CanLearnTeachableMove(species, MOVE_SURF))
+                    return TRUE;
+            }
         }
     }
     return FALSE;
