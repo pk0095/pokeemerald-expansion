@@ -2955,27 +2955,32 @@ static void SetPartyMonSelectionActions(struct Pokemon *mons, u8 slotId, u8 acti
 
 static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
 {
-    u8 i, j;
+    u8 j;
+    u8 numFieldMoveActions = 0;
+    enum Species species = GetMonData(&mons[slotId], MON_DATA_SPECIES);
 
     sPartyMenuInternal->numActions = 0;
     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_SUMMARY);
-
     if ((P_STAT_EDITOR_ALWAYS || FlagGet(P_FLAG_STAT_EDITOR_GET)) && P_PARTY_MENU_STAT_EDITOR)
         AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_STAT_EDITOR);
-
-    // Add field moves to action list
-    for (i = 0; i < MAX_MON_MOVES; i++)
+    // Add field moves to action list - capped at MAX_MON_MOVES so we never exceed the fixed-size actions[9] array
+    for (j = 0; j != FIELD_MOVES_COUNT && numFieldMoveActions < MAX_MON_MOVES; j++)
     {
-        for (j = 0; j != FIELD_MOVES_COUNT; j++)
+        enum Move move = FieldMove_GetMoveId(j);
+        bool32 canUse = MonKnowsMove(&mons[slotId], move);
+
+        if (!canUse)
         {
-            if (GetMonData(&mons[slotId], i + MON_DATA_MOVE1) == FieldMove_GetMoveId(j))
-            {
-                AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, j + MENU_FIELD_MOVES);
-                break;
-            }
+            enum Item hmItem = GetTMHMItemIdFromMoveId(move);
+            canUse = (hmItem != ITEM_NONE && CheckBagHasItem(hmItem, 1) && CanLearnTeachableMove(species, move));
+        }
+
+        if (canUse)
+        {
+            AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, j + MENU_FIELD_MOVES);
+            numFieldMoveActions++;
         }
     }
-
     if (!InBattlePike())
     {
         if (GetMonData(&mons[1], MON_DATA_SPECIES) != SPECIES_NONE)
