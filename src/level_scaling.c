@@ -267,8 +267,8 @@ u16 ValidateSpeciesForLevel(u16 species, u8 level, bool8 manageEvolutions)
             u16 target = evolutions[j].targetSpecies;
             if (SanitizeSpeciesId(target) == SPECIES_NONE)
                 continue;
-            if (evolutions[j].method != EVO_LEVEL)
-                continue; // only level-based evolutions are safe to auto-apply here
+            if (GetEvolutionLevelForSpecies(target) == 0)
+                continue; // no known level requirement (override or EVO_LEVEL) - can't safely auto-apply
             if (IsSpeciesLegalAtLevel(target, level))
             {
                 nextSpecies = target;

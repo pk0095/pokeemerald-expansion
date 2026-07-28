@@ -7,7 +7,7 @@ static const struct EvolutionOverride sEvolutionOverrides[] =
     { SPECIES_ALAKAZAM,             35 },
     { SPECIES_MACHAMP,              35 },
     { SPECIES_GOLEM,                35 },
-    { SPECIES_GOLEM_ALOLA,         35 },
+    { SPECIES_GOLEM_ALOLA,          35 },
     { SPECIES_GENGAR,               35 },
     { SPECIES_ESCAVALIER,           28 },
     { SPECIES_ACCELGOR,             28 },
@@ -19,8 +19,8 @@ static const struct EvolutionOverride sEvolutionOverrides[] =
     // ===================== TRADE (held item) =====================
     { SPECIES_POLITOED,             36 },
     { SPECIES_SLOWKING,             34 },
-    { SPECIES_SLOWKING_GALAR,    34 },
-    { SPECIES_SLOWBRO_GALAR,     34 },
+    { SPECIES_SLOWKING_GALAR,       34 },
+    { SPECIES_SLOWBRO_GALAR,        34 },
     { SPECIES_STEELIX,              33 },
     { SPECIES_SCIZOR,               33 },
     { SPECIES_PORYGON2,             30 },
@@ -37,19 +37,19 @@ static const struct EvolutionOverride sEvolutionOverrides[] =
 
     // ===================== STONE =====================
     { SPECIES_RAICHU,               25 },
-    { SPECIES_RAICHU_ALOLA,        25 },
-    { SPECIES_SANDSLASH_ALOLA,     22 },
+    { SPECIES_RAICHU_ALOLA,         25 },
+    { SPECIES_SANDSLASH_ALOLA,      22 },
     { SPECIES_NIDOQUEEN,            30 },
     { SPECIES_NIDOKING,             30 },
     { SPECIES_CLEFABLE,             25 },
     { SPECIES_NINETALES,            25 },
-    { SPECIES_NINETALES_ALOLA,     25 },
+    { SPECIES_NINETALES_ALOLA,      25 },
     { SPECIES_WIGGLYTUFF,           20 },
     { SPECIES_VILEPLUME,            28 },
     { SPECIES_BELLOSSOM,            32 },
     { SPECIES_VICTREEBEL,           30 },
     { SPECIES_EXEGGUTOR,            30 },
-    { SPECIES_EXEGGUTOR_ALOLA,     30 },
+    { SPECIES_EXEGGUTOR_ALOLA,      30 },
     { SPECIES_CLOYSTER,             24 },
     { SPECIES_STARMIE,              25 },
     { SPECIES_VAPOREON,             24 },
@@ -66,7 +66,7 @@ static const struct EvolutionOverride sEvolutionOverrides[] =
     { SPECIES_SIMIPOUR,             22 },
     { SPECIES_WHIMSICOTT,           25 },
     { SPECIES_LILLIGANT,            25 },
-    { SPECIES_DARMANITAN_GALAR,  35 },
+    { SPECIES_DARMANITAN_GALAR,     35 },
     { SPECIES_HELIOLISK,            27 },
     { SPECIES_FLORGES,              30 },
     { SPECIES_DOUBLADE,             32 },
@@ -76,7 +76,7 @@ static const struct EvolutionOverride sEvolutionOverrides[] =
     { SPECIES_CHANDELURE,           38 },
     { SPECIES_GALLADE,              28 },
     { SPECIES_FROSLASS,             28 },
-    { SPECIES_ELECTRODE_HISUI,    23 },
+    { SPECIES_ELECTRODE_HISUI,      23 },
 
     // ===================== HELD-ITEM USE AT LEVEL-UP =====================
     { SPECIES_WEAVILE,              35 },
@@ -84,7 +84,7 @@ static const struct EvolutionOverride sEvolutionOverrides[] =
 
     // ===================== FRIENDSHIP =====================
     { SPECIES_MR_MIME,              25 },
-    { SPECIES_MR_MIME_GALAR,     25 },
+    { SPECIES_MR_MIME_GALAR,        25 },
     { SPECIES_SNORLAX,              25 },
     { SPECIES_CROBAT,               40 },
     { SPECIES_TOGETIC,              22 },
@@ -103,10 +103,10 @@ static const struct EvolutionOverride sEvolutionOverrides[] =
     { SPECIES_VIKAVOLT,             33 },
     { SPECIES_CRABOMINABLE,         30 },
     { SPECIES_CETITAN,              34 },
-    { SPECIES_GOODRA_HISUI,       50 },
+    { SPECIES_GOODRA_HISUI,         50 },
 
     // ===================== SPECIAL CONDITIONS =====================
-    { SPECIES_MAROWAK_ALOLA,       28 },
+    { SPECIES_MAROWAK_ALOLA,        28 },
     { SPECIES_SIRFETCHD,            36 },
     { SPECIES_RUNERIGUS,            33 },
     { SPECIES_OBSTAGOON,            40 },
