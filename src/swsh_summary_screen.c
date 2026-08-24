@@ -39,6 +39,7 @@
 #include "pokemon_sprite_visualizer.h"
 #include "pokemon_storage_system.h"
 #include "pokemon_summary_screen.h"
+#include "stat_editor.h"
 #include "pokerus.h"
 #include "region_map.h"
 #include "scanline_effect.h"
@@ -2640,6 +2641,25 @@ static void DrawNextSkillsButtonPrompt(u8 mode)
 
 #define IS_MOVE_PAGE(page) (page == PSS_PAGE_BATTLE_MOVES || page == PSS_PAGE_CONTEST_MOVES)
 
+static inline bool32 ShouldShowStatEditor_SwSh(void)
+{
+    return ((P_STAT_EDITOR_ALWAYS || FlagGet(P_FLAG_STAT_EDITOR_GET)) && P_SUMMARY_SCREEN_STAT_EDITOR
+         && !sMonSummaryScreen->lockMovesFlag
+         && sMonSummaryScreen->mode != SUMMARY_MODE_BOX_CURSOR
+         && !InBattleFactory()
+         && !InSlateportBattleTent());
+}
+
+static void CB2_StatEditorCallback_SwSh(void)
+{
+    ShowPokemonSummaryScreen_SwSh(SUMMARY_MODE_STAT_EDITOR, gParties[B_TRAINER_PLAYER], gSpecialVar_0x8004, gPartiesCount[B_TRAINER_PLAYER] - 1, gInitialSummaryScreenCallback);
+}
+
+static void CB2_StatEditorReturnToSummaryScreen_SwSh(void)
+{
+    StatEditor_Init(CB2_StatEditorCallback_SwSh);
+}
+
 static void Task_HandleInput(u8 taskId)
 {
     s16 *data = gTasks[taskId].data;
@@ -2695,7 +2715,24 @@ static void Task_HandleInput(u8 taskId)
         }
         else if (JOY_NEW(START_BUTTON))
         {
-            if (sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO && ShouldShowRename())
+            if (ShouldShowStatEditor_SwSh() && sMonSummaryScreen->currPageIndex == PSS_PAGE_SKILLS)
+            {
+                sMonSummaryScreen->callback = CB2_StatEditorReturnToSummaryScreen_SwSh;
+                if (sMonSummaryScreen->isBoxMon)
+                {
+                    gSpecialVar_0x8004 = PC_MON_CHOSEN;
+                    gSpecialVar_MonBoxPos = sMonSummaryScreen->curMonIndex;
+                    gSpecialVar_MonBoxId = StorageGetCurrentBox();
+                }
+                else
+                {
+                    gSpecialVar_0x8004 = sMonSummaryScreen->curMonIndex;
+                }
+                StopPokemonAnimations();
+                PlaySE(SE_SELECT);
+                BeginCloseSummaryScreen(taskId);
+            }
+            else if (sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO && ShouldShowRename())
             {
                 if (sMonSummaryScreen->isBoxMon)
                 {

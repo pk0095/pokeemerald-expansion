@@ -31,6 +31,14 @@ InsideOfTruck_EventScript_SetIntroFlagsMale::
 	setflag FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_2F_POKE_BALL
 	setvar VAR_LITTLEROOT_HOUSES_STATE_BRENDAN, 1
 	setdynamicwarp MAP_LITTLEROOT_TOWN, 3, 10
+	giveitem ITEM_CUT_TOOL
+	giveitem ITEM_FLY_TOOL
+	giveitem ITEM_SURF_TOOL
+	giveitem ITEM_STRENGTH_TOOL
+	giveitem ITEM_FLASH_TOOL
+	giveitem ITEM_ROCK_SMASH_TOOL
+	giveitem ITEM_WATERFALL_TOOL
+	giveitem ITEM_DIVE_TOOL
 	releaseall
 	end
 
@@ -44,6 +52,14 @@ InsideOfTruck_EventScript_SetIntroFlagsFemale::
 	setflag FLAG_HIDE_LITTLEROOT_TOWN_MAYS_HOUSE_2F_POKE_BALL
 	setvar VAR_LITTLEROOT_HOUSES_STATE_MAY, 1
 	setdynamicwarp MAP_LITTLEROOT_TOWN, 12, 10
+	giveitem ITEM_CUT_TOOL
+	giveitem ITEM_FLY_TOOL
+	giveitem ITEM_SURF_TOOL
+	giveitem ITEM_STRENGTH_TOOL
+	giveitem ITEM_FLASH_TOOL
+	giveitem ITEM_ROCK_SMASH_TOOL
+	giveitem ITEM_WATERFALL_TOOL
+	giveitem ITEM_DIVE_TOOL
 	releaseall
 	end
 
