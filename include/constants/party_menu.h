@@ -113,4 +113,6 @@ enum CanMoveBeLearned
     CANNOT_LEARN_MOVE_IS_EGG
 };
 
+#define PARTY_MENU_PC_ACCESS FALSE
+
 #endif // GUARD_CONSTANTS_PARTY_MENU_H
