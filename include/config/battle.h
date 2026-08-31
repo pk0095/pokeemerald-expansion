@@ -127,7 +127,7 @@
 #define B_TRANSFORM_SHINY           GEN_LATEST // In Gen4+, Transform will copy the shiny state of the opponent instead of maintaining its own shiny state.
 #define B_TRANSFORM_CATCH_RATE      GEN_LATEST // In Gen3 and Gen 4, Transform'ed will have the catch rate of the tranformed species but they will keep their original catch rate in other generations
 #define B_TRANSFORM_BATTLE_REWARDS  GEN_LATEST // In Gen3 and Gen 4, a Transform'ed Pokemon will give the xp and ev yield of its copied species whereas it gives the xp and ev yield of the original species in other gens
-#define B_TRANSFORM_FORM_CHANGES    GEN_4      // In Gen5+, Transformed Pokemon cannot change forms.
+#define B_TRANSFORM_FORM_CHANGES    GEN_LATEST // In Gen5+, Transformed Pokemon cannot change forms.
 #define B_WIDE_GUARD                GEN_LATEST // In Gen5 only, Wide Guard has a chance to fail if used consecutively.
 #define B_QUICK_GUARD               GEN_LATEST // In Gen5 only, Quick Guard has a chance to fail if used consecutively.
 #define B_IMPRISON                  GEN_LATEST // In Gen5+, Imprison doesn't fail if opposing Pokémon don't have any moves the user knows.
