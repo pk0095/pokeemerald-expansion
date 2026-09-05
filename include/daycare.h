@@ -38,6 +38,7 @@ void IncrementDaycareSteps(void);
 bool32 CheckDaycareMonReceivedMail(void);
 enum Species GetEggSpecies(enum Species species);
 u32 GetChildNature(struct DayCare *daycare);
+u32 GetEggCyclesToSubtract(void);
 void InheritIVs(struct Pokemon *egg, struct DayCare *daycare);
 void InheritAbility(struct Pokemon *egg, struct DayCare *daycare);
 

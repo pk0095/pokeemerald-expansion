@@ -1519,7 +1519,7 @@ EWRAM_DATA struct BagMenu *gBagMenu = 0;
 EWRAM_DATA struct BagPosition gBagPosition = {0};
 static EWRAM_DATA struct ListBuffer1 *sListBuffer1 = 0;
 static EWRAM_DATA struct ListBuffer2 *sListBuffer2 = 0;
-EWRAM_DATA u16 gSpecialVar_ItemId = 0;
+EWRAM_DATA enum Item gSpecialVar_ItemId = 0;
 static EWRAM_DATA struct TempWallyBag *sTempWallyBag = 0;
 #if SWSH_ITEM_MENU_IN_BAG_USE
 static EWRAM_DATA struct BagItemUseState *sBagItemUseState = NULL;
@@ -1545,6 +1545,10 @@ void CB2_BagMenuFromBattle(void)
         GoToBagMenu(ITEMMENULOCATION_BATTLE, POCKETS_COUNT, CB2_SetUpReshowBattleScreenAfterMenu2);
     else
         GoToBattlePyramidBagMenu(PYRAMIDBAG_LOC_BATTLE, CB2_SetUpReshowBattleScreenAfterMenu2);
+}
+void CB2_ChooseBall(void)
+{
+    GoToBagMenu(ITEMMENULOCATION_RAIDEND, POCKET_POKE_BALLS, CB2_SetUpReshowBattleScreenAfterMenu2);
 }
 
 // Choosing berry to plant

@@ -501,7 +501,6 @@
 #define MUS_CASINO_PLUS_8           567
 #define MUS_CASINO_PLUS_9           568
 #define MUS_CASINO_PLUS_GACHA       569
-#define END_MUS                     MUS_CASINO_PLUS_GACHA
 
 #define END_MUS                     558
 
