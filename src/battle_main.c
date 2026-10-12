@@ -1788,19 +1788,6 @@ void CB2_QuitRecordedBattle(void)
     }
 }
 
-void ModifyPersonalityForNature(u32 *personality, u32 newNature)
-{
-    u32 nature = GetNatureFromPersonality(*personality);
-    s32 diff = abs((s32)nature - (s32)newNature);
-    s32 sign = (nature > newNature) ? 1 : -1;
-    if (diff > NUM_NATURES / 2)
-    {
-        diff = NUM_NATURES - diff;
-        sign *= -1;
-    }
-    *personality -= (diff * sign);
-}
-
 void VBlankCB_Battle(void)
 {
     // Change gRngSeed every vblank unless the battle could be recorded.
@@ -2862,14 +2849,13 @@ static void BattleStartClearSetData(void)
     }
     gBattleStruct->beatUpSlot = 0;
 
-    for (i = 0; i < PARTY_SIZE; i++)
+    for (u32 partySlot = 0; partySlot < PARTY_SIZE; partySlot++)
     {
         for (enum BattleTrainer trainer = B_TRAINER_PLAYER; trainer < MAX_BATTLE_TRAINERS; trainer++)
         {
-            gBattleStruct->partyState[trainer][i].usedHeldItem = ITEM_NONE;
-            gBattleStruct->itemLost[trainer][i].originalItem = GetMonData(&gParties[trainer][i], MON_DATA_HELD_ITEM);
-            gPartyCriticalHits[i] = 0;
+            SetItemsToRestoreAfterBattle(trainer, partySlot);
         }
+        gPartyCriticalHits[partySlot] = 0;
     }
 
     ClearPursuitValues();
@@ -3803,8 +3789,6 @@ enum
 static void HandleTurnActionSelectionState(void)
 {
     s32 i;
-
-    gAiLogicData->reverseBattlerLogicOrder = RandomPercentage(RNG_AI_REVERSE_BATTLER_LOGIC_ORDER, GetConfig(AI_REVERSE_BATTLER_LOGIC_ORDER_CHANCE)) && IsDoubleBattle();
 
     gBattleCommunication[ACTIONS_CONFIRMED_COUNT] = 0;
     for (enum BattlerId battlerIndex = 0; battlerIndex < gBattlersCount; battlerIndex++)

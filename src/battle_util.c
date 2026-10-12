@@ -2660,6 +2660,7 @@ bool32 TryFieldEffects(enum FieldEffectCases caseId)
         }
         else if (gStartingStatuses.tailwindPlayer || gStartingStatuses.tailwindPlayerTemporary)
         {
+            gCurrentMove = MOVE_TAILWIND;
             effect = SetStartingSideStatus(
                         SIDE_STATUS_TAILWIND,
                         B_SIDE_PLAYER,
@@ -2671,6 +2672,7 @@ bool32 TryFieldEffects(enum FieldEffectCases caseId)
         }
         else if (gStartingStatuses.tailwindOpponent || gStartingStatuses.tailwindOpponentTemporary)
         {
+            gCurrentMove = MOVE_TAILWIND;
             effect = SetStartingSideStatus(
                         SIDE_STATUS_TAILWIND,
                         B_SIDE_OPPONENT,
@@ -4022,10 +4024,11 @@ u32 AbilityBattleEffects(enum AbilityEffect caseID, enum BattlerId battler, enum
                     .move = MOVE_NONE,
                 };
 
-                cv.abilities[gBattlerAttacker] = GetBattlerAbility(gBattlerAttacker);
-                cv.abilities[gBattlerTarget] = ability;
-                cv.holdEffects[gBattlerAttacker] = GetBattlerHoldEffect(gBattlerAttacker);
-                cv.holdEffects[gBattlerTarget] = GetBattlerHoldEffect(gBattlerTarget);
+                for (enum BattlerId i = 0; i < gBattlersCount; i++)
+                {
+                    cv.abilities[i] = GetBattlerAbility(i);
+                    cv.holdEffects[i] = GetBattlerHoldEffect(i);
+                }
 
                 struct StatChange st = {
                     .onlyChecking = TRUE,
@@ -4533,7 +4536,7 @@ u32 AbilityBattleEffects(enum AbilityEffect caseID, enum BattlerId battler, enum
                         break;
                     }
 
-                    StealTargetItem(battler, targetBattler, ITEM_NONE);
+                    StealTargetItem(battler, targetBattler, ITEM_NONE, FALSE);
                     gBattlerAbility = battler;
                     gEffectBattler = targetBattler;
                     BattleScriptCall(BattleScript_MagicianActivates);
@@ -6135,7 +6138,7 @@ static inline u32 CalcTerrainBoostedPower(struct DamageContext *ctx, u32 basePow
         isTerrainAffected = IsBattlerTerrainAffected(ctx->battlerAtk, ctx->abilities[ctx->battlerAtk], ctx->holdEffects[ctx->battlerAtk], GetMoveTerrainBoost_Terrain(ctx->move), ctx->terrain);
     else if (GetMoveTerrainBoost_GroundCheck(ctx->move) == GROUND_CHECK_TARGET)
         isTerrainAffected = IsBattlerTerrainAffected(ctx->battlerDef, ctx->abilities[ctx->battlerDef], ctx->holdEffects[ctx->battlerDef], GetMoveTerrainBoost_Terrain(ctx->move), ctx->terrain);
-    else if (gFieldTimers.terrain == GetMoveTerrainBoost_Terrain(ctx->move)) // no ground check (Psyblade)
+    else if (ctx->terrain == GetMoveTerrainBoost_Terrain(ctx->move)) // no ground check (Psyblade)
         isTerrainAffected = TRUE;
 
     if (isTerrainAffected)
@@ -6793,7 +6796,7 @@ static inline u32 CalcMoveBasePowerAfterModifiers(struct DamageContext *ctx)
         && !IsMultiHitMove(move)
         && moveEffect != EFFECT_POWER_BASED_ON_USER_HP
         && moveEffect != EFFECT_POWER_BASED_ON_TARGET_HP
-        && GetMovePriority(move) == 0)
+        && GetMovePriority(move) <= 0)
     {
         return 60;
     }
@@ -6810,6 +6813,21 @@ static bool32 IsRuinStatusActive(u32 fieldEffect)
     }
 
     return FALSE;
+}
+
+static inline uq4_12_t GetParadoxAbilityModifier(enum BattlerId battler, enum Move move, enum Stat physicalStat, enum Stat specialStat)
+{
+    if (gBattleMons[battler].volatiles.transformed)
+        return UQ_4_12(1.0);
+
+    enum Stat highestStat = GetParadoxBoostedStatId(battler);
+    enum DamageCategory category = GetBattleMoveCategory(move);
+
+    if ((category == DAMAGE_CATEGORY_PHYSICAL && highestStat == physicalStat)
+     || (category == DAMAGE_CATEGORY_SPECIAL && highestStat == specialStat))
+        return (physicalStat == STAT_ATK || specialStat == STAT_SPATK) ? UQ_4_12(1.3) : UQ_4_12_FLOORED(1.3);
+
+    return UQ_4_12(1.0);
 }
 
 static inline uq4_12_t ApplyOffensiveBadgeBoost(uq4_12_t modifier, enum BattlerId battler, enum Move move)
@@ -7003,26 +7021,12 @@ static inline u32 CalcAttackStat(struct DamageContext *ctx)
             modifier = uq4_12_multiply(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_PROTOSYNTHESIS:
-        if (!(gBattleMons[battlerAtk].volatiles.transformed))
-        {
-            enum Stat atkHighestStat = GetParadoxBoostedStatId(battlerAtk);
-            if (ctx->weather & B_WEATHER_SUN || gBattleMons[battlerAtk].volatiles.boosterEnergyActivated)
-            {
-                if ((IsBattleMovePhysical(move) && atkHighestStat == STAT_ATK) || (IsBattleMoveSpecial(move) && atkHighestStat == STAT_SPATK))
-                    modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
-            }
-        }
+        if (ctx->weather & B_WEATHER_SUN || gBattleMons[battlerAtk].volatiles.boosterEnergyActivated)
+            modifier = uq4_12_multiply(modifier, GetParadoxAbilityModifier(battlerAtk, move, STAT_ATK, STAT_SPATK));
         break;
     case ABILITY_QUARK_DRIVE:
-        if (!(gBattleMons[battlerAtk].volatiles.transformed))
-        {
-            enum Stat atkHighestStat = GetParadoxBoostedStatId(battlerAtk);
-            if (gFieldTimers.terrain == B_TERRAIN_ELECTRIC || gBattleMons[battlerAtk].volatiles.boosterEnergyActivated)
-            {
-                if ((IsBattleMovePhysical(move) && atkHighestStat == STAT_ATK) || (IsBattleMoveSpecial(move) && atkHighestStat == STAT_SPATK))
-                    modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
-            }
-        }
+        if (ctx->terrain == B_TERRAIN_ELECTRIC || gBattleMons[battlerAtk].volatiles.boosterEnergyActivated)
+            modifier = uq4_12_multiply(modifier, GetParadoxAbilityModifier(battlerAtk, move, STAT_ATK, STAT_SPATK));
         break;
     case ABILITY_ORICHALCUM_PULSE:
         if (ctx->weather & B_WEATHER_SUN && IsBattleMovePhysical(move)
@@ -7030,7 +7034,7 @@ static inline u32 CalcAttackStat(struct DamageContext *ctx)
            modifier = uq4_12_multiply(modifier, UQ_4_12(1.3333));
         break;
     case ABILITY_HADRON_ENGINE:
-        if (gFieldTimers.terrain == B_TERRAIN_ELECTRIC && IsBattleMoveSpecial(move))
+        if (ctx->terrain == B_TERRAIN_ELECTRIC && IsBattleMoveSpecial(move))
            modifier = uq4_12_multiply(modifier, UQ_4_12(1.3333));
         break;
     case ABILITY_FIRE_MANE:
@@ -7215,7 +7219,7 @@ static inline u32 CalcDefenseStat(struct DamageContext *ctx)
         }
         break;
     case ABILITY_GRASS_PELT:
-        if (gFieldTimers.terrain == B_TERRAIN_GRASSY && usesDefStat)
+        if (ctx->terrain == B_TERRAIN_GRASSY && usesDefStat)
         {
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
             if (ctx->updateFlags)
@@ -7227,22 +7231,12 @@ static inline u32 CalcDefenseStat(struct DamageContext *ctx)
             modifier = uq4_12_multiply_half_down(modifier, UQ_4_12(1.5));
         break;
     case ABILITY_PROTOSYNTHESIS:
-        {
-            enum Stat defHighestStat = GetParadoxBoostedStatId(battlerDef);
-            if (((ctx->weather & B_WEATHER_SUN) || gBattleMons[battlerDef].volatiles.boosterEnergyActivated)
-             && ((IsBattleMovePhysical(move) && defHighestStat == STAT_DEF) || (IsBattleMoveSpecial(move) && defHighestStat == STAT_SPDEF))
-             && !(gBattleMons[battlerDef].volatiles.transformed))
-                modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
-        }
+        if (ctx->weather & B_WEATHER_SUN || gBattleMons[battlerDef].volatiles.boosterEnergyActivated)
+            modifier = uq4_12_multiply(modifier, GetParadoxAbilityModifier(battlerDef, move, STAT_DEF, STAT_SPDEF));
         break;
     case ABILITY_QUARK_DRIVE:
-        {
-            enum Stat defHighestStat = GetParadoxBoostedStatId(battlerDef);
-            if ((gFieldTimers.terrain == B_TERRAIN_ELECTRIC || gBattleMons[battlerDef].volatiles.boosterEnergyActivated)
-             && ((IsBattleMovePhysical(move) && defHighestStat == STAT_DEF) || (IsBattleMoveSpecial(move) && defHighestStat == STAT_SPDEF))
-             && !(gBattleMons[battlerDef].volatiles.transformed))
-                modifier = uq4_12_multiply(modifier, UQ_4_12(1.3));
-        }
+        if (ctx->terrain == B_TERRAIN_ELECTRIC || gBattleMons[battlerDef].volatiles.boosterEnergyActivated)
+            modifier = uq4_12_multiply(modifier, GetParadoxAbilityModifier(battlerDef, move, STAT_DEF, STAT_SPDEF));
         break;
     default:
         break;
@@ -9304,25 +9298,64 @@ void SortBattlersBySpeed(enum BattlerId *battlers, bool32 slowToFast)
     }
 }
 
+struct LostItem *GetLostItemState(enum BattleTrainer trainer, u32 slot)
+{
+    return &gBattleStruct->itemLost[trainer][slot];
+}
+
+void SetItemsToRestoreAfterBattle(enum BattleTrainer trainer, u32 partySlot)
+{
+    gBattleStruct->partyState[trainer][partySlot].usedHeldItem = ITEM_NONE;
+
+    struct LostItem *lostItem = GetLostItemState(trainer, partySlot);
+    lostItem->originalItem = GetMonData(&gParties[trainer][partySlot], MON_DATA_HELD_ITEM);
+    lostItem->restoreAfterBattle = B_RESTORE_HELD_BATTLE_ITEMS >= GEN_9 || B_TRAINERS_KNOCK_OFF_ITEMS;
+}
+
 void TryRestoreHeldItems(void)
 {
-    if (!B_TRAINERS_KNOCK_OFF_ITEMS && B_RESTORE_HELD_BATTLE_ITEMS < GEN_9)
-        return;
-
-    bool32 returnNPCItems = B_RETURN_STOLEN_NPC_ITEMS >= GEN_5 && gBattleTypeFlags & BATTLE_TYPE_TRAINER;
-
-    for (u32 i = 0; i < PARTY_SIZE; i++)
+    for (enum BattleTrainer trainer = 0; trainer < gBattlersCount; trainer++)
     {
-        if (gBattleStruct->itemLost[B_TRAINER_PLAYER][i].stolen || returnNPCItems)
+        for (u32 partySlot = 0; partySlot < PARTY_SIZE; partySlot++)
         {
-            enum Item lostItem = gBattleStruct->itemLost[B_TRAINER_PLAYER][i].originalItem;
+            struct LostItem *lostItem = GetLostItemState(trainer, partySlot);
+            enum Item originaItem = lostItem->originalItem;
 
-            if (GetItemPocket(lostItem) == POCKET_BERRIES && GetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_HELD_ITEM) != lostItem)
-                lostItem = ITEM_NONE;
+            if (lostItem->wildItemPending)
+            {
+                AddBagItem(originaItem, 1);
+                continue;
+            }
 
-            if ((lostItem != ITEM_NONE || returnNPCItems) && GetItemPocket(lostItem) != POCKET_BERRIES)
-                SetMonData(&gParties[B_TRAINER_PLAYER][i], MON_DATA_HELD_ITEM, &lostItem);
+            if (!lostItem->stolen && !lostItem->restoreAfterBattle)
+                continue;
+
+            if (originaItem == ITEM_NONE)
+                continue;
+
+            if (GetItemPocket(originaItem) == POCKET_BERRIES)
+                continue;
+
+            SetMonData(&gParties[trainer][partySlot], MON_DATA_HELD_ITEM, &originaItem);
         }
+    }
+}
+
+void RestoreCaughtWildMonHeldItem(struct Pokemon *mon, enum BattlerId battler)
+{
+    struct LostItem *lostItem = GetLostItemState(GetBattlerTrainer(battler), gBattlerPartyIndexes[battler]);
+
+    if (GetMonData(mon, MON_DATA_HELD_ITEM) != lostItem->originalItem)
+    {
+        enum Item itemToRestore = ITEM_NONE;
+        SetMonData(mon, MON_DATA_HELD_ITEM, &itemToRestore);
+    }
+
+    if (lostItem->wildItemPending)
+    {
+        enum Item itemToRestore = lostItem->originalItem;
+        SetMonData(mon, MON_DATA_HELD_ITEM, &itemToRestore);
+        lostItem->wildItemPending = FALSE;
     }
 }
 
@@ -9953,11 +9986,17 @@ bool32 AreMultiPartiesFullTeams(void)
     enum DifficultyLevel difficulty = GetCurrentDifficultyLevel();
 
     if (B_MULTI_HALF_TEAMS)
-		return FALSE;
+    {
+        gSpecialVar_Result = FALSE;
+        return FALSE;
+    }
 
-	if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
-		return TRUE;
-		
+    if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
+    {
+        gSpecialVar_Result = TRUE;
+        return TRUE;
+    }
+
     if (TRAINER_BATTLE_PARAM.opponentA == TRAINER_LINK_OPPONENT
      || gBattleTypeFlags & BATTLE_TYPE_TOWER_LINK_MULTI
      || (gTrainers[difficulty][TRAINER_BATTLE_PARAM.opponentA].multiTeamSize == MULTI_TEAM_SIZE_HALF)
@@ -10732,6 +10771,9 @@ void RemoveAbilityFlags(enum BattlerId battler)
 
     switch (GetBattlerAbility(battler))
     {
+    case ABILITY_NEUTRALIZING_GAS:
+        gSpecialStatuses[battler].neutralizingGasRemoved = TRUE;
+        break;
     case ABILITY_FLASH_FIRE:
         gBattleMons[battler].volatiles.flashFireBoosted = FALSE;
         break;
