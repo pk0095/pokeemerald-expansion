@@ -6195,6 +6195,12 @@ static inline u32 CalcMoveBasePower(struct DamageContext *ctx)
     u32 moveEffect = GetMoveEffect(move);
     u32 weight, hpFraction, speed;
 
+    if (move == MOVE_WHIRLPOOL
+     && gBattleMons[battlerAtk].species == SPECIES_LUGIA)
+    {
+        basePower = 150;
+    }
+
     switch (GetActiveGimmick(battlerAtk))
     {
     case GIMMICK_Z_MOVE:
