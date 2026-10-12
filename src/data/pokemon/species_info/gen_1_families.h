@@ -1117,7 +1117,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
         .friendship = STANDARD_FRIENDSHIP,
         .growthRate = GROWTH_MEDIUM_SLOW,
         .eggGroups = MON_EGG_GROUPS(EGG_GROUP_MONSTER, EGG_GROUP_WATER_1),
-        .abilities = { ABILITY_TORRENT, ABILITY_MEGA_LAUCHER, ABILITY_RAIN_DISH },
+        .abilities = { ABILITY_TORRENT, ABILITY_MEGA_LAUNCHER, ABILITY_RAIN_DISH },
         .bodyColor = BODY_COLOR_BLUE,
         .speciesName = _("Blastoise"),
         .cryId = CRY_BLASTOISE,
@@ -2194,7 +2194,7 @@ const struct SpeciesInfo gSpeciesInfoGen1[] =
     [SPECIES_RATICATE] =
     {
         .baseHP        = 55,
-        .baseAttack    = 91, --81
+        .baseAttack    = 91, //81
         .baseDefense   = 60,
         .baseSpeed     = 107, //97
         .baseSpAttack  = 50,
